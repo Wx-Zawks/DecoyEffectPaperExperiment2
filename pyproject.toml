@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dim-prm-reproduction"
+version = "0.1.0"
+description = "Python reproduction of the DIM + PRM incentive mechanism paper"
+requires-python = ">=3.9"
+dependencies = ["matplotlib>=3.8"]
+
+[tool.setuptools]
+packages = ["repro"]

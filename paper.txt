@@ -1,0 +1,1515 @@
+﻿IEEE TRANSACTIONS ON JO  NAL NAME, MANUSCRIPT ID                                                                               1
+
+ Research On Incentive Mechanisms for task
+ offloading in fog computing based on Decoy
+
+                           Effect
+
+ Incentive mechanism based on behavioral economics considering task inducement and variable
+                                                      individual preference
+
+                 First A. Author, Second B. Author Jr., and Third C. Author, Member, IEEE
+
+Abstract--
+
+
+
+
+
+
+ DIMDecoy Incentive Mechanism
+ PRM Preference Reverse for pushing tasks
+Mechanism
+
+
+
+
+         Index Terms--Keywords should be taken from the taxonomy (http://www.computer.org/mc/keywords/keywords.htm). Keywords
+         should closely reflect the topic and should optimally characterize the paper. Use about fo  key words or phrases in
+         alphabetical order, separated by commas (there should not be a period at the end of the index terms)
+
+                                             --------------------  --------------------
+
+1.INTRODUCTION                                                                  [17]
+
+                                                                                
+
+Fog Node FN [ ]
+
+[1, 2]  
+
+ [ ]
+
+[17] 
+
+[181920][2122] [8]
+
+ 
+
+                              --------------------------------                  [9]
+                                                                                      [1542
+ F.A. Author is with the National Institute of Standards and Technology,
+   Boulder, CO 80305. E-mail: author@ boulder.nist.gov.                         43][474849][525354]
+                                                                                
+ S.B. Author Jr. is with the Department of Physics, Colorado State
+   University, Fort Collins, CO 80523. E-mail: author@colostate.edu.            
+                                                                                
+ T.C. Author is with the Electrical Engineering Department, University of       
+   Colorado, Boulder, CO 80309. On leave from the National Research             
+   Institute for Metals, Tsukuba, Japan E-mail: author@nrim.go.jp.
+
+***Please provide a complete mailing address for each author, as                
+this is the address the 10 complimentary reprints of yo  paper
+                                                                                
+
+will be sent                                                                    [13]
+
+                                                                                
+
+Please note that all acknowledgments should be placed at the end of the paper,  
+before the bibliography (note that corresponding authorship is not noted in     [57] A  B 
+affiliation box, but in acknowledgment section).
+
+                xxxx-xxxx/0x/$xx.00 � 200x IEEE Published by the IEEE Computer Society
+AUTHOR ET AL.: TITLE                 2
+
+A  25 B  5  [46]
+
+ 35  
+
+C  A  
+
+[14]                  [47]
+
+ 
+
+                      
+
+ [48]
+
+ [49]
+
+[15] 
+
+ [50]
+
+ 
+
+ 
+
+ [51] Stackelberg
+
+ 
+
+[16]                  
+
+  Stackelberg 
+
+ 
+
+ 2.1.2 
+
+1 DIM                 [52]
+
+ 
+
+ 
+
+ 
+
+                      
+
+2 PRM  [53] P2P 
+
+ 
+
+ [54]
+
+ 
+
+ 
+
+ 
+
+                      [55]
+
+ distributed denial of service DDoS
+
+ [13]
+
+ PRM  
+ 
+
+ 2.1.3 
+
+                            
+                      
+2.RELATED WORK        
+
+      
+
+ 
+
+                      
+
+2.1                   
+
+ [434413]
+
+[][][] [44]
+ [43]
+
+ 
+
+                      [13]
+
+2.1.1                 
+
+[42]                  
+
+ICAM cloudlet  
+
+ 
+
+[15] 
+ [424546][46]
+
+[43] [42, 45]
+
+ 
+
+[44] 
+
+ 
+
+[45]                  
+
+ VCG  V2V  
+
+ 
+AUTHOR ET AL.: TITLE                                                                3
+
+                                          [66, 67]
+                                          [68]
+                                          
+
+2.3                                       
+
+      Decoy Effect                              
+
+[57],                                     
+[56] ADAsymmetric dominance
+                                          
+
+[58]                                      
+
+                                          3.
+Decoy
+Alternative                                      DIM 
+ 1  3                                     PRM 
+                                           DIM  PRM
+
+                                          3.1 
+
+                                                
+
+                                           DIM  PRM
+                                          3.1.1 
+
+                                                 I I  2
+                                          J J  2
+                                          
+
+                                          
+
+                                          
+
+                                          
+
+                                           1 
+                                          
+
+                   1  3                   TABLE 1 PARAMETER TABLE
+      1FFrequency Increasing
+ 2                                         Variable                    Description
+                                                     
+      2RRange Increasing                             
+ 1                                                   
+                                                     
+      3RFRange-Frequency-                            
+                                                     
+                                                     
+                                                      i 
+                                          (|)        
+                                                      i 
+                                               
+
+[58]                                             2a 2b
+----                                       2a
+                                           2b
+                                          
+[59]
+                                          
+      
+                                                
+
+                                          
+                                                
+[60]1
+                                          DIM j   
+                                          
+
+(i) =                 i        i  0  (1)        
+                      -( - i)  i  0
+                                                          ,     
+                                          
+ 1 
+                                                
+      
+                                          
+
+                                                                ,       
+                                           PRM 
+[62]
+
+
+      [65]
+
+
+
+AUTHOR ET AL.: TITLE                                               4
+
+ 2a                                                       3 
+                                PRM  3  45678  PRM 
+                          
+
+                           4 5
+                          
+
+                           6  7
+                           8
+                          
+
+                          3.2 
+
+                               DIM 
+
+                          
+
+                          
+
+                           DIM
+
+                          
+
+                          3.2.1 
+
+ 2b                           
+
+                       2        j                      =  1      
+                                                             =1
+
+                                =  1      
+                                      =1
+
+ j (, , ) 
+  A 
+ i   B 
+(, ) i   C  1 
+                           1
+ i 
+
+ Input = 12J
+
+                          OutputA, B, C
+
+      1                   1.    =  1         =  1      
+                                      =1           =1
+
+      2                   2.  A, B, C  
+      3                   3.  for j = 1: J do
+                          4.
+                          5.     if  > &&  > 
+                          6.          A  j
+3.1.2                     7.
+                                 else if  < &&  < 
+       3  DIM  PRM
+                                      B  j
+
+DIM  3  123  DIM          8.  else C  j
+
+ 1                        9. return A, B, C
+
+ 10. end
+                               1 
+ 3  2
+ 3 tttt  A, B, C 
+                          (, )
+
+                          (, )
+
+                               tt 
+
+                          
+AUTHOR ET AL.: TITLE                                                                                                   5
+
+  Q 
+
+ 3.3.3 
+
+
+
+
+
+
+
+
+
+
+
+2
+
+      =  (  -  )(      ' -   )  +     (2)
+                       - 
+
+'
+
+                                                                     3  3 
+                                                     2.3 
+
+
+
+
+                                                 
+
+tt(3)                                                  F 
+
+   M(tt|r) = (|) + (|)                (3)          [0,1] = 1
+
+(|) tt                                                 R 
+
+(|) tt                                            = 1 > 1
+                                                      RF   [0,1]
+2
+                                                  > 1
+(4)(5)
+
+                                                    
+
+(|) =          ( - )          -   0        (4)   
+               -( - )         -  < 0             
+                - ( - )
+(|) =          ( - )          -   0        (5)         ' AB 
+                              -  < 0
+                                                 Mgoal(goal|r')Mcompete(compete|r')
+
+                                                 
+
+                                                 
+
+[] =  0 <  =  < 1                                       3-1 K 
+ > 1                                             K 
+                                                 
+
+                                                 
+                                                  K = Mgoal(goal|r') - Mcompete(compete|r') - [MA(A|r) - MB(B|r)] (6)
+ 1  AB 
+ 3-1                                                    K> 0
+                                                  K K<0
+       3-1A, B                                    K 
+       2.3 A, B                                  K=0
+ 3-1                                             
+
+ > &&  <  > &&  <                                   
+
+45A, B( -                                         2.3 
+) > ( - )( - ) < ( - )A                          
+
+BB                                                      3-2
+3.2.2 
+                                                 0
+      decoy                                      0 3-2 
+
+                                                        3-
+
+       A goal(vgoal, tgoal) =                    1  DIM 
+                                                 
+
+A(vA, tA) B                                          3-1 DIM  
+
+compete(vcompete, tcompete) = B(vB, tB)          [  2-   ,  1]    [1,  2-   ]
+decoy(vdecoy, tdecoy)goal                                                 
+
+                                                    
+
+                                                  4 
+
+ = vdecoy/vgoal = tdecoy/tgoal                   
+
+'(',           ')'           =  ++
+
+      ++                                      3
+
+'  =               3
+
+ 2.3 goal
+
+ 3 
+
+ FRRF  3  P
+AUTHOR ET AL.: TITLE                                                                                                                                     6
+
+                                                                                  11 h()
+
+                                                                            t = t'ave - tave
+                                                                            t > 0  0
+
+                                                                                   > 31                      -(+)
+                                                                                                         =1
+                                                                                                                         
+                                                                                                             
+
+                                                                                   RF R  F 
+
+                                                                             R  F 
+
+                                                                            31                                     -(+)          <    <  1        >
+                                                                                                              =1
+
+                                                                            31                                      
+
+                                                                                      -(+)
+                                                                                  =1
+                                                                                                  
+                          4                                                           
+
+       > ' >  < ' <                                                                3-1  3-2 
+
+                                                                             
+
+2-    2-2-    2-                               (7)                          [ 31      -(+)      ,  1]         [1,  2-      ]
+                                                                                  =1                                  
+
+                                     
+
+                              2-             12-                                   3-3 
+
+          >                >              >                         <       
+
+1   (0,1],   1                                                                     3-3 R 
+
+          2-               11        2-        (8)                          0                   =  10        =  2-
+                                        
+                                                                                                                   
+
+       3-1  DIM                                                                    f()
+                                                                                                         +      +  
+                                                                            f'()     =-     (   -            3          )-1
+                                                                                         3
+AB                                                                                                               +      +  
+                                                                                                                     3
+ 3-                                                                                             +  3     (                       -  )-1        >  0(12)
+
+2                                                                                  0 f()
+
+       3-231                   -(+)  <      <  1                 >          0 = 1  R 
+                           =1
+
+31                                                                          h()
+
+        -(+)   K>0                                                          H'()      =-     (     -     +       +      )-1
+    =1                                                                                                        3
+                                                                                          3
+                                                                                                                +  +  
+                                                                                                                   3
+       1 36                                                                                        +  3  (                    -  )-1     >  0     (13)
+
+
+
+        K =(PA(vA|v'ave) + QA(tA|t'ave)) - (PB(vB|v'ave) + QB(tB|t'ave)) -         0 h()
+
+[(PA(vA|vave) + QA(tA|tave)) - (PB(vB|vave) + QB(tB|tave))] > 0     (9)     0     =  2-
+
+       F  = 1                                                                           
+
+' =  A 3.2.3 
+                                                                                   3-3 
+B 9
+45910  2
+
+                                                                             2DIM 
+
+       ((vA - v'ave) - (vA - vave)) + ((v'ave - vB)                         Input = A, B, C
+                            - (vave - vB)) > 0 (10)                         Output = goal, compete, decoy
+
+       f()v =
+
+v'ave - vave(vA - vave - v) -                                               Letgoal = Acompete = B
+(vA - vave) + [(vave - vB + v) - (vave - vB)] > 0
+v = 0  0PA + PB > 0                                                         Create decoy
+
+ 0 <  =  < 1 > 1                                                            0     =   10     =  2-
+
+                                                                                                   
+
+      v < 0 PA > 0, PB < 0PA + PB <                                         Let vdecoy = 0vgoaltdecoy = 0tgoal
+0v > 0 PA < 0, PB > 0PA + PB > 0
+v > 0  0 >                                                                  If C  
+
+                                                                                C=decoy
+
+31      -(+)                                                                Else add task decoy to 
+    =1                                                                      Output = goal, compete, decoy
+                     
+        
+
+       R  = 1
+
+v'ave = vave A                                                                     3-2 
+                                                                            
+B 3-8
+                                                                            2-4 
+3-33-43-8                                                                   5-8 
+                                                                            3.2.4 DIM 
+-((tA - t'ave) - (tA - tave)) - [(t'ave - tB) - (tave -
+tB)] > 0 (11)
+AUTHOR ET AL.: TITLE                                                                                7
+
+       DIM                                                               3-2DIM 
+ 3-2  DIM                                                         PMMRA 
+
+                                                                         3-1  3-2 
+                                                                  (|') > (|)
+                                                                  
+
+
+  [0,1]                                                           
+1 -  > 0.5  < 0.5                                                        3-2 
+ = 0.5 14
+                                                                  
+                                                                  
+, = (|) + (1 - )(|)                      14
+                                                                  3.3 
+, i  tt (tt  {A, B})
+                                                                         3.2 
+(|)                                                               
+
+(|)45                                                             
+
+                                                                   PRM
+                                                                  
+
+                                                                  3.3.1 
+ 23 
+
+       2                                                                 3.2 
+                                                                  
+
+                      1      2        3                            2.3  6 
+
+                                                                  """"""
+
+                      16     6        24                          "" 4.2 
+
+                      10     4        10                          ""
+
+                      1      1.2      1                           ""
+
+                       3                                          ""
+                                                                  
+
+                                                                  ""
+
+  1                   2   3     4  5      6                       
+                                                                  
+
+ 0.15 0.63 0.61 0.58 0.46 0.2                                           
+                                                                        H1
+ 1                    2   1.7 1.5 1.4 1.1                         
+
+      3 =                                                               H2
+7' = 8 = 11' = 15.3                                               
+ =  = 10 =  = 16 =  = 4 =                                         
+
+ = 61                                                                   H3
+
+11,23-13
+
+1, = 0.15 � (10 - 7)0.88 - 0.75 � 2.25 � (16 - 11)0.88 - 6.561,
+
+1, =- 0.15 � 2.25 � (7 - 4)0.88 + 0.75 � (11 - 6)0.88  2.204
+
+1, = 0.15 � (10 - 8)0.88 - 0.75 � 2.25 � (16 - 15.3)0.88 - 0.957
+
+1, =- 0.15 � 2.25 � (8 - 4)0.88 + 0.75 � (15.3 - 6)0.88  4.194
+
+1, < 1,1
+
+21, < 1,1
+
+22346
+
+23416
+
+251
+
+2 5 
+
+                                                                                     6 
+
+                                                                        
+                                                                  
+                                                                   4 
+                                                                  
+
+                                                                                                4 
+
+                   5 
+       3-2  DIM 
+
+AUTHOR ET AL.: TITLE                                                                                                8
+
+3.3.2                                                                             
+       3.2.4 
+                                                                            t 
+
+                                                         ,                  i  j 
+
+                                                         ,                     j 
+
+3.2.4                                                                          type 
+                                                                     t  i 
+ 3.2.4 
+ t  i ,                                            
+ t t  0 i  tt tt  {A, B}
+                                                    - 1 ,-1 < , -1
+                                                   t, > t,16
+                                                    + 1 +1 =  + +1 > 0.5
+14
+
+, =  (|) + (1 - )(|)                         (15)  17
+
+(|)
+
+(|)45                                                           +       -         > 0.5                 18
+                                                                    1 -   - 
+t = 0  DIM 
+
+ r(, ) 3.2 
+
+0, 0DIM                                                 1a ve > ave  -
+
+ t - 1(t = 0)                                       > 0 - B > 0
+
+ 2.3                                                -   - 1.5  -  +  -   + 0.5  -  < 0
+
+                                                                                                              (19)
+
+
+  =  -
+  ,  =- 1.5  -  +  -  ,  = 0.5  -  
+                                                       =  -  >0 
+ 0  1 
+                                                                                             2-4
+16                                                 --                                        2     <    <
+
+        +                        , > ,             -+ 22-4, , 
+
++1 =  -                          , < , (16)                                   2 - 4
+                                                                                          >
+                          , = ,|| = 0|| = 1        1.5  -  +  -            +                 1.5  - 
+                                                                    2  -                     2  - 
++1 i  t + 1(t  0)
+                                                                    > 0.5
+ 2.3 
+                                                   
+
+                                                                              2              2
+                                                      3 + -      -  1 + -           -
+                                                                               +  2 -         <  < 0.5
+17                                                    4 2 -         4 2 -
+
+                          ( - )                    
+                          - )( - )
+           =          (1            (17)                    4-1  43                          +     -       -
+                                                                                                   -
+ 3.3.1 ( - )                                                                                    2
+
+ B  A                                              1  +  2  -  2      -    2
+                                                   4        -       2 -
+                                                                +           <  < 0.5 
+
+(1 - )( - )                                        
+
+A  B                                                  
+
+3.3.3                                              
+
+                                                    0, ,   i  j 
+                                                   , ,  =  j 
+
+
+                                                    i 
+
+                                                   
+
+ A                                                 20
+ A 
+ 0.5  3.2                                                            = max , - ,-                          (20)
+3-3 t, > t,
+ A  3-2                                              = {, , }decoy
+
+                                                    - 
+
+                                                       i  i 
+
+ DIM  A                                            
+B 
+ 4-1                                               21
+                                                          , = , ,  - max , - ,- ,    (21)
+
+                                                         
+
+ 4-1                                               ' 5%
+                                                   '' = 
+                                    3 + -    -     
+                                                   
+                                    4 2 -
+
+1 + -  2     -            2
+           2 -
+4 2 -   +                  0.5)
+AUTHOR ET AL.: TITLE                                                                                        9
+
+                                                                 0 3.3.2 
+                            11 12 ... 1
+                                                                2-5 
+                      21          22   ...  2
+                  =   ...         ...  ...  ...           (22)  
+
+                      1 2 ...                                    0 
+
+     i                                                           16-10  Vickrey
+
+j i,j = 1i,j = 0                                                
+ 1  1 j 
+                                                                11-18 
+
+                                                                3.3.4 
+
+                                                                
+
+Vickrey                                                         
+
+ i                                                              
+
+ b'i,j j ,                                                      
+i,j = 1
+ 0                                                              
+
+                                                                
+
+                                                                2416
+
+                                                                
+
+ 0                                                                          , - ,- = , ,  - ,           24
+
+ i 23                                                            t 
+
+              = , , - , + 0.05'                           (23)  
+
+     3.3.2                                                       4-1 
+
+                                                                
+
+                                                                 3 
+
+ 4-1                                                               1. No Preference Reverse Nodes
+
+     4-1PRM                                                     NPRN 3.2 
+
+Input = goal , compete , decy , I                                
+OutputE, pi,j, t//,                                             (0.5,1)  
+t
+                                                                   2. Preference Reverse NodesPRN
+1. Initialize, = 0 for , ,  = 1;
+                                                                 3.2 
+
+                                                                
+
+2. For i=1 to I do                                               4-1                     3 + -    -
+
+3. If Wit,A > Wit,B then it+1 = ti + y //                                                4 2 -
+
+                                                                1 + -       2     -  2
+                                                                                2 -
+                                                                4 2 -        +        0.5)  
+
+4. Else if Wti,A < Wti,B then it+1 = it - y                        3. Perference Reverse Influence Nodes
+5. Else if Wit,A = Wti,B||ti = 0||ti = 1 then ti+1 = it 
+                                                                PRIN 3.2 
+
+                                                                
+
+                                                                
+
+6. For j =1 to J                                                 4-1  
+
+7.  bi,j = Ci,j tj, fi - Wi,tt - Wi,T-tt //                     0  3  +     -  -  1 + -  2     -  2
+                                                                   4        -                2 -
+                                                                         2        4 2 -   +        )  
+
+                                                                
+
+8. Select the sub-optimal bid b'i,j = 1                          type  {, , }
+                                                                3.3.5 
+9.  Set ai,j = 1 and pi,j= b'i,j
+
+                                                                
+
+10. End for                                                      PRN  PRIN 
+
+11. For j=1 to J                                                 4-2 
+                                                                      t || 3.2.1 
+12. If I1ai,j  1
+                                                                
+
+13. Select the sub-optimal bid b'i,j = 1//                       3.3.4 
+
+    ,                                                           
+
+                                                                 4-2 
+
+14. else                                                         4-2 PRN+1        = 1+1  = 31  J=1j- +  
+                                                                                                    
+15. add to t//                                                   PRIN+1 = 2-+1 = 31            J=1j- + 
+
+16. End if                                                                                          
+17. End for
+18. End for                                                     
+
+      PRM  4-1                                                         PRN 
+                                                                 = , - ,15
+AUTHOR ET AL.: TITLE                                                                               10
+
+                     =  PA vvave - P vvave                             4-3 
+                        + 1 -   ttave -  ttave
+                                                            > 0 (25)  
+     25
+                                                                      
+ v - vave  +  vave - v  + 1 -  - t - tave  -
+ tave - t  > 0 =  = 1,  = 2                                           26
+ 4 - 5 +  + 1 -  4 - 5 -  > 0
+ 3-3                                                                         = =1 =1,  ,  - ,  26
+
+                                                                       j  ,  
+
++1 = 1+1 = 31                               J=1j- +                    , j 
+                                                 
+                                                                      
+
+                                                                       4-1 
+
+      PRIN  = ,B - ,A 3-                                              ,
+2 +1 = 2-+1 = 31                                                             4-1 PRM 
+                                                         J=1j- +    
+                                                                       DIM 
+                                                                             4-1  7  9 
+
+
+      21
+
+ 4-2                                                                  
+
+ 4-2 FNPRM                                                            
+
+Input ,                                                               
+Outputty+p1e = goal , compete , decoy
+1. ,                                                                        1 NPRN
+                                                                       A , - , > 0
+2. for i to I
+3. if  > 0.5                                                                2 PRN
+4. then NPRN = i                                                       A , -
+                                                                      , > 0
+5. if 3 + - -             1  +  2  -        2     -  2 <  < 0.5
+                          4        -            2 -                         3 PRIN
+            4 2 -                            +                         B , - , > 0
+
+6. then PRN = i                                                       PRM 
+
+7.   if     <  3  +    -  -        1  +     -   2     -  2            
+               4     2 -           4        -       2 -                      4-2PRM 
+                                         2       +
+
+8. then PRIN = i                                                       DIM
+
+9. end for                                                                   4-1  PRM 
+                                                                      
+10. While    do
+11. DIM                                                               
+
+12. for i to I                                                               4-3PRM 
+                                                                       DIM
+13. if type =  then set +1 = , +1 = ;
+                                                                              4-1  PRM 
+14.      if type =        then set +1 = 1,      +1 = 31  J=1j- + ;    , DIM  4-2  PRM 
+                                                                       DIM 26
+                                                                      PRM 
+                                                                      DIM 
+15.      if type =  then set +1 = 2- +1 =                             3.4.2 
+
+; 31J                                                                        PRM  DIM 
+    =1  j-  +                                                         
+
+                                                                       4-44-5
+                                                                      4-5 
+16. end for
+                                                                             4-4PRM 
+17. Let decoy = +1goal , decoy = +1goal ;                                    PRM 
+                                                                      
+18. add task decoy to ty+p1e ;
+                                                                      
+19. Outputty+p1e = goal , compete , decoy
+                                                                      b,
+      4-2 
+
+ 1-9 
+
+ 3-1 
+
+12-16 
+
+17-19
+
+
+
+3.4                                                                   b,=0
+                                                                       PRM 
+      
+PRM  DIM                                                                     4-5PRM 
+3.4.1                                                                       23 4-1
+ PRM  DIM  3.4.2  PRM                                                 
+
+3.4.1                                                                 b, < p, = b',b',
+                                                                      b,
+      
+4-1                                                                          4-6PRM 
+ 4-2  PRM                                                                   PRM  4-1
+                                                                      
+AUTHOR ET AL.: TITLE                                                 11
+
+(log)                                      a K 
+
+(log). 4-1 
+(log + log) PRM  I  J 
+
+
+4 
+
+4.1 
+      
+
+
+
+ DIM 
+ PMMRA [36]PMMRA 
+ OS X
+ InteliJ IDEA  java 
+4.1.1 
+
+      DIM 
+PMMRA  3-6 
+
+                           3- 6 
+
+                      
+
+I   [10-60]                  
+                      
+J   50
+
+,  [1-1.5]GHz             
+                                         
+
+    [2-20]              
+
+    [200-               
+    2000]
+                                           b
+,   0.88               
+
+    2.25                                    3- 5  DIM 
+
+    (0-1)                                   = 1>1.6 
+                                            3-5-b 
+ 50 
+                                            K 
+ 10-60 0-1                                 4.1.3 
+ 0.5 1 
+                                           
+4.1.2 
+ DIM  decoy 
+ 3.3.1  1  K  goal compete  3-6 
+
+ 
+ goal compete decoy
+
+ 0  1 0.1   0decoy 
+
+ 1  2 0.1  goal 
+
+ 50  30 
+
+ 3-5-a  3-1
+
+3-23-3
+
+
+
+>1.7 
+
+
+
+
+
+ 3.3.1 
+ 3-3 
+
+
+
+
+
+                                                              3- 6 
+                                                  3- 7
+                                           
+AUTHOR ET AL.: TITLE                                                        12
+
+                                     3-3 
+
+                                    4.2 
+
+                                        
+
+                                    
+
+                                    
+
+                                     OS X 
+
+                                     InteliJ IDEA  java 
+
+                                    4.2.1 
+
+                                        PRM 
+
+                                    PMMRA[36] 4-2 
+
+                                                     4- 2 
+
+                                                            
+
+                           aPMMRA        [10 - 60]               
+                                             50          
+                            bDIM                        
+        3- 7                        ,   [1-1.5]GHz
+       3- 7  3-7-                                                         
+a  PMMRA 3-7-b  DIM 
+ DIM                                 [10KB-1M]             
+PMMRA  3-2 
+                                    ti  (0 - 1)      t   
+
+4.1.4                                    PRM  DIM 
+       R 
+ 3                                  PRM  DIM 
+
+                                     4-3 
+                    3- 8 
+       3- 8                                  4- 3 DIM  PRM 
+
+ R                                                  DIM       PRM
+F  RF 
+                                                            NPRNPRNPRIN
+
+                                      
+
+                                                            
+
+                                                            
+
+                                      
+
+                                                  
+
+                                                  
+
+                                                              
+
+                                           50 
+                                     10-600i 
+                                    0-1 
+                                    4.2.2 
+
+                                           PRM DIM  PMMRA 
+                                    
+
+                                    
+
+                                     d 
+                                     d=0.5
+
+                                           4-2 
+                                    PRM 
+                                    PMMRA  DIM 
+                                    
+
+                                    
+
+                                    
+
+                                    
+
+                                           0.5
+                                    ti DIM 
+                                    PRM 
+
+                                           4-3  DIM 
+                                    
+
+                                     d < 0.5 
+                                    d < 0.5 
+                                     DIM 
+                                     d  0.5 
+AUTHOR ET AL.: TITLE                                         13
+
+ 4- 2                                            4- 5 
+                                          4-5  DIM 
+                                   PRM  PMMRA  PRM 
+                                    DIM  DIM 
+                                   
+
+                                    PRM  DIM 
+                                   4.2.4 
+
+                                          PRM DIM 
+                                   PMMRA 
+                                   
+
+ 4- 3 DIM 
+
+  4- 4 PRM                                            4- 6 
+                                          4-6 
+                                   DIM  PMMRA  PRM
+ 0.5                                PRM 
+                                    DIM  PMMRA 
+                                   
+         PRM  4-4 
+PRM                                
+
+                                   
+4.2.3 
+           PRM DIM                 
+
+PMMRA  30
+
+AUTHOR ET AL.: TITLE                                                                                 14
+
+                                       PRM 
+
+                                        DIM  PMMRA  DIM 
+
+                                       PMMRA 
+
+                                        25 DIM 
+
+                                       
+
+                                        DIM 
+
+                                       
+
+                                       
+
+                                        4-9  50 
+
+                                       PRM 
+
+                                        DIM  PMMRA 
+
+                                       5 CONCLUSION
+
+                                              DIM 
+
+                                       PRM
+
+                                        DIM 
+
+                                       
+
+ 4- 7                                   PRM 
+
+ 4-7  PRM  
+
+DIM  PMMRA  
+
+                                       
+
+4.2.5                                  
+
+ 25  50                                
+
+ PRM DIM  
+
+PMMRA  
+
+ 0-1  0.5 1                                References
+
+                                       [1] Location-Dependent Task Allocation for Mobile
+
+                                       Crowdsensing With Clustering Effect
+                                       [2] Xinglin Zhang , Le Jiang, and Xiumin Wang, Incentive
+                                       Mechanisms for Mobile Crowdsensing With
+
+                                       Heterogeneous Sensing Costs,IEEE TRANSACTIONS ON
+
+                                       VEHICULAR       TECHNOLOGY,                  vol.68,pp.3992-
+
+                                       4002,apr.2019.
+
+                                       [3] A Location-based Incentive Algorithm for
+
+                                       Consecutive Crowd Sensing Tasks
+
+                                       [4] Mariano Gonz�lez-S�nchez,Juan Nave and Gonzalo
+                                       Rubio,Effects of uncertainty and risk aversion on the
+
+                                       exposure of investment-style factor returns to real
+
+                                       activity,Research in International Business and
+
+ 4- 8  25                              Finance,vol.53,may.2020.
+                                       [5] Sang-Eun Byun, Siyuan Han, Hyejeong Kim and
+                                       Carol Centrallo,"US small retail businesses' perception of
+
+                                       competition: Looking through a lens of fear, confidence,
+
+                                       or cooperation",Journal of Retailing and Consumer
+
+                                       Services,vol. 52,ISSN 0969-6989, jan. 2020.
+
+                                       [6] Liu W , Yang Y , Wang E , et al. User Recruitment for
+
+                                       Enhancing Data Inference Accuracy in Sparse Mobile
+
+                                       CrowdSensing[J]. IEEE Internet of Things Journal, 2019,
+
+                                       PP(99):1-1.
+
+                                       [7] Yang J , Fu L , Yang B , et al. Participant Service
+
+                                       Quality Aware Data Collecting Mechanism With High
+
+                                       Coverage for Mobile Crowdsensing[J]. IEEE Access, 2020,
+
+                                       8:10628-10639.
+
+                                       [8] L, G, Jaimes, et al. A location-based Incentive
+                                       Algorithm for Consecutive Crowd Sensing Tasks[J]. IEEE
+
+ 4- 9  50                              Latin America Transactions, 2016, 14(2):811-817.
+                                     
+                                       [9] Rula J P , Bustamante F E . Crowdsensing Under (Soft)
+      4-8  25 
+                                       Control[C]// Computer Communications. IEEE, 2015.
+
+                                       [10] Zhiyong    Yu,Weiping                   Zhu,Longkun
+AUTHOR ET AL.: TITLE                                                                                                15
+
+Guo,Wenzhong Guo,Zhiwen Yu. Task allocation for           Shayne Loft, Ottmar V. Lipp,"Individual differences in
+crowdsensing based on submodular optimisation[J].
+International Journal of Ad Hoc and Ubiquitous            higher-level cognitive abilities do not predict
+Computing,2020,33(1).
+[11]Unknown Worker Recruitment with Budget and            overconfidence              in   complex        task
+Covering Constraints for Mobile Crowdsensing[C]//
+2019 IEEE 25th International Conference on Parallel and   performance,"Consciousness and Cognition,Volume
+Distributed Systems (ICPADS). IEEE, 2019.
+[12] Gao G , Xiao M , Wu J , et al. Truthful Incentive    74,2019,102777,ISSN 1053-8100,
+Mechanism for Nondeterministic Crowdsensing with
+Vehicles[J]. IEEE TRANSACTIONS ON MOBILE                  [24] Ye,Bei,"A Model of Managerial Overconfidence,
+COMPUTING, 2018:1-1.                                      Moral Hazard and Corporate Investments,"International
+[13] Yang S , Han K , Wu F , et al. On Designing
+Quality-Aware Steering Algorithms for Large-Scale         Conference on Management & Service Science. IEEE, 2011.
+Mobile Crowdsensing[C]// 2018 15th Annual IEEE
+International Conference on Sensing, Communication,       [25] Fu-hua Guo,"A Study of Delegated Portfolio
+and Networking (SECON). IEEE, 2018.                       Management Based on Overconfidence,"Proceedings of
+[14] Chen H , Cao Y , Guo B , et al. LuckyPhoto:
+Multi-facet Photographing with Mobile Crowdsensing.       the 2011 Fourth International Conference on Business
+2018.
+[15] Wei X , Wang Y , Gao S , et al. Data Quality         Intelligence and Financial Engineering,2011,pp.333�335.
+Aware Task Allocation Under a Feasible Budget in
+Mobile Crowdsensing[C]// 2018 IEEE/ACM 26th               [26] Li Yan-xi,Zhang Min,"Empirical study on
+International Symposium on Quality of Service (IWQoS).    managerial overconfidence and corporate investment
+ACM, 2018.
+[16] Huang P , Zhu W , Liao K , et al. Efficient          decisions--Based on the differences of manager's
+Algorithms for Flexible Sweep Coverage in
+Crowdsensing[J]. IEEE Access, 2018, 6:50055-50065.        level,"Management Science and Engineering
+[17] Zheng Z , Fan W , Gao X , et al. A Budget
+Feasible Incentive Mechanism for Weighted Coverage        (ICMSE),Dallas, TX, USA,2012,pp. 206-212.
+Maximization in Mobile Crowdsensing[J]. IEEE
+Transactions on Mobile Computing, 2017, PP(9):1-1.        [27] Tsai, Yung-Shun; Chang, Chun-Ping; and Tzang,
+[18] Song C , J Gu, Liu M . Deployment Mechanism
+Design for Cost-Effective Data Uploading in Delay-        Shyh-Weir,"The Impact of Stock Prices, Risks, and
+Tolerant Crowdsensing[C]// 2017 IEEE International
+Symposium on Parallel and Distributed Processing with     Business Cycle on Overconfidence,"10th International
+Applications and 2017 IEEE International Conference on
+Ubiquitous Computing and Communications                   Conference on Innovative Mobile and Internet Services in
+(ISPA/IUCC). IEEE, 2018.
+[19] Shien L K , Singh M M . A secure mobile              Ubiquitous Computing (IMIS) ,Fukuoka Inst Technol,
+crowdsensing (MCS) location tracker for elderly in smart
+city[C]// THE 2ND INTERNATIONAL CONFERENCE                Fukuoka, JAPAN,2016,pp.551-555.
+ON APPLIED SCIENCE AND TECHNOLOGY 2017
+(ICAST'17). American Institute of Physics Conference      [28] Yu Wang,Yan Zhou,"The role of managers'
+Series, 2017.
+                                                          overconfidence on the irrational investment,"Conference:
+
+                                                          2017 14th International Conference on Service Systems
+
+                                                          and Service Management (ICSSSM),Dalian,
+
+                                                          China,2017,ISSN: 2161-1904.
+
+                                                          [29] Ruiz-Conde, Enar; Jose Mas-Ruiz, Francisco and
+                                                          Calderon-Martinez, Aurora,"Peer-review: overconfidence
+
+                                                          bias in a conference setting,"10th International
+
+                                                          Conference on Service Systems and Service Management
+
+                                                          (ICSSSM),Chinese Univ Hong Kong, CUHK Business Sch,
+
+                                                          Dept Syst Engn & Engn Managemen, Hong Kong,
+
+                                                          PEOPLES R CHINA,2013,pp.800-802.
+
+                                                          [30] 
+
+                                                          [31] Fischer Black, Myron Scholes, " The Pricing of
+
+                                                          Options and Corporate Liabilities, " vol.81,pp.637-
+
+                                                          654,may.1973.
+
+                                                          [32] Q. Yang, "Road of Brand Innovation for Private E
+
+                                                          nterprises in Main Tea Production Area -
+
+                                                          Analysis on "Herding Effect" in Mingshan County, Sichu
+
+                                                          an Province," 2011 International Conference on Managem
+
+                                                          ent and Service Science, Wuhan, 2011, pp. 1-4.
+
+[20] Zuo-Jun          Wang,Shu  Li,Cheng-Ming             [33] Fan, Dong J . Pricing Based on the Binary Tree
+                                                          Model under Public Infrastructure Projects[J]. Advanced
+
+Jiang,"Emotional response in a disjunction                Materials Research, 2013, 756-759:2971-2974.
+
+condition,Journal of Economic Psychology,"pp.71-          [34] Zhang M L , Yuan-Huib L I . Application of
+
+78,jun.2011.                                              binary tree model in the project investment decisions.
+
+[21] J.B. Broekaert,J.R. Busemeyer and E.M.               Journal of Yangzhou University(Natural ence Edition),
+
+Pothos,"The Disjunction Effect in two-stage simulated     2010.
+
+gambles. An experimental study and comparison of a        [35] Shang Y , Wang Z , Wang Q , et al. Forecasting
+
+heuristic logistic, Markov and quantum-like               the fluctuation of oil price based on Hull-White model
+
+model,"Cognitive Psychology,vol.117,mar.2020.             and binary tree model. Systems Engineering-Theory &
+
+[22] ]Markowitz, H.M,"Portfolio selection, "Journal of    Practice, 2012, 32(9):1-5.
+
+Finance,vol. 7,pp.77-91, 1952.                            [36] Zhao D , Ma H , Ji X . Generalized Lottery Trees:
+                                                          Budget-Balanced Incentive Tree Mechanisms for
+[23] Troy A.W. Visser, Angela D. Bender, Vanessa K.
+                                                          Crowdsourcing[J]. IEEE Transactions on Mobile
+Bowden, Stephanie C. Black, Jayden Greenwell-Barnden,
+AUTHOR ET AL.: TITLE                                                                                                16
+
+Computing, 2020, PP(99):1-1.                            (LATINCOM). IEEE, 2015.
+                                                        [55]Chakeri A , Wang X , Goss Q , et al. A Platform-
+[37]                                                    Based Incentive Mechanism for Autonomous Vehicle
+[38] ContextAiDe: End-to-End Architecture for           Crowdsensing[J]. 2021.
+Mobile Crowd-sensing Applications                       [56]Jaimes L G , Calderon J M . Gaussian mixture
+[39] Crowd Sensing in Vehicular Networks Using          model for crowdsensing incentivization[C]// 2018
+Uncertain Mobility Information                          IEEE 8th Annual Computing and Communication
+[40] Automatic Rich Map Semantics Identification        Workshop and Conference (CCWC). IEEE, 2018.
+through Smartphone-based Crowd-sensing                  [57]Hou F , Pei Y . Social-aware incentive mechanism
+[41] Incentive Mechanism Design Based on Stochastic     for full-view covered video collection in
+Game for Multi-Modality Crowd Sensing                   crowdsensing[J]. IET Communications, 2018,
+[42] A Crowd-Sensing Framework for Allocation of        12(20):2600-2608.
+Time-Constrained and Location-based Tasks               [58]Jaimes L G , Calderon J M . An UAV-based
+[43] Bootstrap based Uncertainty Propagation for        incentive mechanism for Crowdsensing with budget
+Data Quality Estimation in Crowdsensing Systems         constraints[C]// 2020 IEEE 17th Annual Consumer
+[44] Dynamic Task Pricing in Multi-Requester Mobile     Communications & Networking Conference (CCNC).
+Crowd Sensing with Markov Correlated Equilibrium        IEEE, 2020.
+[45]Quantifying Sensing Quality of Crowd Sensing
+Networks with Confidence Interval                            First A. Author All biographies should be limited to
+[46]An Online Pricing Mechanism for Mobile              one paragraph consisting of the following: sequentially
+Crowdsensing                                            ordered list of degrees, including years achieved;
+Data Markets                                            sequentially ordered places of employ concluding with c
+[47]                                                     rent employment; association with any official jo 
+                                                         nals or conferences; major professional and/or
+[48] Ali Liaquat,Khan Saima,Nazir Mamona,Raiz           academic achievements, i.e., best paper awards,
+                                                        research grants, etc.; any publication information (number
+Naheed,Naz            Saima,Zengin  Gokhan,Mukhtar      of papers and titles of books published); c  rent
+                                                        research interests; association with any professional
+Mahreen,Parveen Shehla,Shazmeen Natasha,Saleem          associations. Author membership information, e.g., is a
+                                                        member of the IEEE and the IEEE Computer Society, if
+Muhammad,Tareen Rasool Baksh. Chemical profiling,       applicable, is noted at the end of the biography.
+
+in vitro biological activities and Pearson correlation       Second B. Author Jr. biography appears here.
+
+between phenolic contents and antioxidant activities         Third C. Author biography appears here.
+
+of Caragana brachyantha Rech.f[J]. South African
+
+Journal of Botany,2021,140.
+
+[49]Ahmed. A. A. Gad-ElRab,Almohammady S.
+
+Alsharkawy. Statistical-Based Data Quality Model for
+
+Mobile Crowd Sensing Systems[J]. Arabian Journal for
+
+Science and Engineering,2018,43(12):
+
+[50] 
+
+[51] .
+
+[52]Xu J , Fu J R , Yang D J , et al. FIMI: A Constant
+
+Frugal Incentive Mechanism for Time Window
+
+Coverage in Mobile Crowdsensing[J]. 
+
+(), 2017(32):919-935.
+
+[53]Xu J , Xiang J , Yang D . Incentive Mechanisms
+
+for Time Window Dependent Tasks in Mobile
+
+Crowdsensing[J]. Wireless Communications, IEEE
+
+Transactions on, 2015, 14(11):6353-6364.
+
+[54]Jaimes L G , Vergara-Laurens I , Raij A . A crowd
+
+sensing incentive algorithm for data collection for
+
+consecutive time slot problems[C]// 2014 IEEE Latin-
+
+America Conference on Communications
+

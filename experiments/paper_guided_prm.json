@@ -1,0 +1,11 @@
+{
+  "seed": 20260328,
+  "task_count": 50,
+  "node_counts": [10, 20, 30, 40, 50, 60],
+  "preference_means": [0.1, 0.3, 0.5, 0.7, 0.9],
+  "repeats": 10,
+  "frequency_range": [1.0, 1.5],
+  "reward_range": [2.0, 20.0],
+  "time_cost_range": [200.0, 2000.0],
+  "output_dir": "outputs_py_prm_tuned"
+}

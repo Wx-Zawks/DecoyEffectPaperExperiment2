@@ -1,0 +1,2 @@
+individual_rationality,truthfulness,computational_efficiency,minimum_node_utility
+True,"{'honest_bid_preserved': True, 'inflated_bid_cancelled': True}","{'claimed_complexity': 'O(IJlogJ)', 'validation_runtime_ms': 2.2917}",0.0

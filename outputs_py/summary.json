@@ -1,0 +1,49 @@
+{
+  "validations": {
+    "individual_rationality": true,
+    "truthfulness": {
+      "honest_bid_preserved": true,
+      "inflated_bid_cancelled": true
+    },
+    "computational_efficiency": {
+      "claimed_complexity": "O(IJlogJ)",
+      "validation_runtime_ms": 2.2917
+    },
+    "minimum_node_utility": 0.0
+  },
+  "mechanism_rows": [
+    {
+      "metric": "avg_participation_intensity",
+      "DIM": 34.65,
+      "PRM": 43.102000000000004,
+      "TRAIM": 31.878
+    },
+    {
+      "metric": "avg_transaction_price_task_level",
+      "DIM": 360.5920744802009,
+      "PRM": 443.71728558631116,
+      "TRAIM": 695.1409113323235
+    },
+    {
+      "metric": "avg_user_utility_task50",
+      "DIM": 26795.833781660487,
+      "PRM": 27912.326855896343,
+      "TRAIM": 25818.902341704113
+    }
+  ],
+  "figure_files": [
+    "figure_3_5.png",
+    "figure_3_6.png",
+    "figure_3_7.png",
+    "figure_3_8.png",
+    "figure_4_2.png",
+    "figure_4_3.png",
+    "figure_4_4.png",
+    "figure_4_5.png",
+    "figure_4_6.png",
+    "figure_4_7.png",
+    "figure_4_8.png",
+    "figure_4_9.png"
+  ],
+  "explanation_file": "DIM_PRM_算法实现说明.md"
+}

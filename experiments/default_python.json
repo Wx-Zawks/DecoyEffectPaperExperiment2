@@ -1,0 +1,30 @@
+{
+  "seed": 20260328,
+  "task_count": 50,
+  "node_counts": [10, 20, 30, 40, 50, 60],
+  "preference_means": [0.1, 0.3, 0.5, 0.7, 0.9],
+  "preference_std": 0.1,
+
+  "repeats": 20,
+  "parameter_repeats": 80,
+  "parameter_node_count": 80,
+  "utility_repeats": 80,
+  "utility_display_scale": 100.0,
+
+  "traim_region_size": 1000.0,
+  "traim_md_cpu_range": [1, 5],
+  "traim_md_rate_range": [1, 10],
+  "traim_bs_cpu_range": [8, 12],
+  "traim_bs_subchannel_range": [6, 9],
+  "traim_bandwidth_mbps": 1.0,
+  "traim_bs_radius_range": [70.0, 180.0],
+  "traim_noise_dbm_range": [-90.0, -70.0],
+  "traim_transmit_power_mw_range": [200.0, 300.0],
+  "traim_task_cost_ratio_range": [0.55, 0.85],
+  "show_progress": true,
+
+  "frequency_range": [1.0, 1.5],
+  "reward_range": [2.0, 20.0],
+  "time_cost_range": [200.0, 2000.0],
+  "output_dir": "outputs_py"
+}
