@@ -1,0 +1,21 @@
+{
+  "preset": "baseline",
+  "seed": 20260328,
+  "task_count": 50,
+  "node_counts": [10, 20, 30, 40, 50, 60],
+  "dim_strategy": "F",
+  "dim_allow_secondary_positive_bids": true,
+  "dim_secondary_min_score_ratio": 0.0,
+  "default_preference_mean": 0.35,
+  "preference_std": 0.22,
+  "comparison_node_count": 30,
+  "repeats": 30,
+  "parameter_repeats": 80,
+  "utility_repeats": 100,
+  "traim_bs_cpu_range": [5, 8],
+  "traim_bs_subchannel_range": [3, 6],
+  "traim_bs_radius_range": [60.0, 145.0],
+  "traim_task_cost_ratio_range": [0.06, 0.15],
+  "utility_display_scale": 100.0,
+  "output_dir": "outputs_py_baseline"
+}

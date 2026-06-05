@@ -1,0 +1,15 @@
+{
+  "preset": "resource_constrained",
+  "seed": 20260329,
+  "task_count": 60,
+  "node_counts": [10, 20, 30, 40, 50, 60],
+  "comparison_node_count": 30,
+  "frequency_range": [0.8, 1.25],
+  "time_cost_range": [400.0, 2600.0],
+  "traim_bs_cpu_range": [5, 8],
+  "traim_bs_subchannel_range": [3, 6],
+  "traim_bs_radius_range": [60.0, 150.0],
+  "repeats": 30,
+  "utility_repeats": 100,
+  "output_dir": "outputs_py_resource_constrained"
+}

@@ -82,7 +82,7 @@ class Platform:
 
     def compare_mechanisms(self, node_count: int, task_count: int, preference_mean: float) -> dict:
         tasks, nodes = self.prepare_environment(node_count, task_count, preference_mean)
-        dim = self.simulate_dim(self.clone_tasks(tasks), self.clone_nodes(nodes), strategy="R")
+        dim = self.simulate_dim(self.clone_tasks(tasks), self.clone_nodes(nodes), strategy=self.config.get("dim_strategy", "R"))
         prm = self.simulate_prm(self.clone_tasks(tasks), self.clone_nodes(nodes))
         traim = self.simulate_traim(self.clone_tasks(tasks), self.clone_nodes(nodes))
         return {
@@ -487,45 +487,59 @@ class Platform:
             competitor_score = ordered_scores[1][1] if len(ordered_scores) > 1 else ordered_scores[0][1]
             selection_counts[chosen_kind] += 1
 
+            bid_kinds = [(chosen_kind, chosen_score)]
+            if self._allow_secondary_dim_bids(bundle, dynamic_update):
+                min_ratio = float(self.config.get("dim_secondary_min_score_ratio", 0.0))
+                for secondary_kind, secondary_score in sorted(action_score_map.items(), key=lambda item: item[1], reverse=True):
+                    if secondary_kind == chosen_kind:
+                        continue
+                    if secondary_score > 0.0 and secondary_score >= max(0.0, chosen_score * min_ratio):
+                        bid_kinds.append((secondary_kind, secondary_score))
+
             recorded_bid: BidRecord | None = None
-            other_scores = [value for kind, value in score_map.items() if kind != chosen_kind]
-            chosen_tasks = list(bundle.category_tasks[chosen_kind])
-            if max_tasks_per_node is not None:
-                chosen_tasks = chosen_tasks[:max_tasks_per_node]
-            for task in chosen_tasks:
-                if not task.is_decoy and task.task_id not in task_registry:
-                    continue
-                truthful_value, threshold = truthful_bid(task, node, chosen_score, other_scores)
-                accepted_bid, was_cancelled = monitor_bid(truthful_value, truthful_value)
-                truthful_cancellations += int(was_cancelled)
-                if accepted_bid <= 0.0:
-                    continue
-                if not task.is_decoy:
-                    participant_node_ids.add(node.node_id)
-                    positive_bid_values_real.append(accepted_bid)
-                effective_task = task_registry.get(task.task_id, task)
-                task_registry.setdefault(effective_task.task_id, effective_task)
-                bid_record = BidRecord(
-                    node_id=node.node_id,
-                    task_id=effective_task.task_id,
-                    task_kind=effective_task.kind,
-                    selected_kind=chosen_kind,
-                    task_time_cost=effective_task.time_cost,
-                    task_reward=effective_task.reward,
-                    reported_bid=truthful_value,
-                    truthful_bid=truthful_value,
-                    accepted_bid=accepted_bid,
-                    execution_cost=execution_cost(task, node),
-                    satisfaction_threshold=threshold,
-                    selected_score=chosen_score,
-                    competitor_kind=competitor_kind,
-                    competitor_score=competitor_score,
-                    truthful=True,
-                    is_decoy=effective_task.is_decoy,
-                )
-                bid_book[effective_task.task_id].append(bid_record)
-                if recorded_bid is None:
-                    recorded_bid = bid_record
+            for bid_kind, bid_score in bid_kinds:
+                bid_other_scores = [value for kind, value in score_map.items() if kind != bid_kind]
+                bid_ordered_scores = sorted(score_map.items(), key=lambda item: item[1], reverse=True)
+                bid_competitors = [(kind, score) for kind, score in bid_ordered_scores if kind != bid_kind]
+                bid_competitor_kind = bid_competitors[0][0] if bid_competitors else bid_kind
+                bid_competitor_score = bid_competitors[0][1] if bid_competitors else bid_score
+                chosen_tasks = list(bundle.category_tasks[bid_kind])
+                if max_tasks_per_node is not None:
+                    chosen_tasks = chosen_tasks[:max_tasks_per_node]
+                for task in chosen_tasks:
+                    if not task.is_decoy and task.task_id not in task_registry:
+                        continue
+                    truthful_value, threshold = truthful_bid(task, node, bid_score, bid_other_scores)
+                    accepted_bid, was_cancelled = monitor_bid(truthful_value, truthful_value)
+                    truthful_cancellations += int(was_cancelled)
+                    if accepted_bid <= 0.0:
+                        continue
+                    if not task.is_decoy:
+                        participant_node_ids.add(node.node_id)
+                        positive_bid_values_real.append(accepted_bid)
+                    effective_task = task_registry.get(task.task_id, task)
+                    task_registry.setdefault(effective_task.task_id, effective_task)
+                    bid_record = BidRecord(
+                        node_id=node.node_id,
+                        task_id=effective_task.task_id,
+                        task_kind=effective_task.kind,
+                        selected_kind=bid_kind,
+                        task_time_cost=effective_task.time_cost,
+                        task_reward=effective_task.reward,
+                        reported_bid=truthful_value,
+                        truthful_bid=truthful_value,
+                        accepted_bid=accepted_bid,
+                        execution_cost=execution_cost(task, node),
+                        satisfaction_threshold=threshold,
+                        selected_score=bid_score,
+                        competitor_kind=bid_competitor_kind,
+                        competitor_score=bid_competitor_score,
+                        truthful=True,
+                        is_decoy=effective_task.is_decoy,
+                    )
+                    bid_book[effective_task.task_id].append(bid_record)
+                    if recorded_bid is None:
+                        recorded_bid = bid_record
             if recorded_bid is None:
                 estimated_preferences[node.node_id] = node.preference
                 continue
@@ -664,6 +678,12 @@ class Platform:
         if weight_sum == 0:
             return 0.0
         return weighted_sum / weight_sum
+
+    def _allow_secondary_dim_bids(self, bundle: PublishedBundle, dynamic_update: bool) -> bool:
+        return (
+            bool(self.config.get("dim_allow_secondary_positive_bids", False))
+            and bundle.strategy in {"F", "R", "RF"}
+        )
 
     def _serialize_round(self, round_result: RoundResult) -> dict:
         return {

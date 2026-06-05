@@ -1,0 +1,17 @@
+{
+  "preset": "decoy_sensitive",
+  "seed": 20260330,
+  "task_count": 50,
+  "node_counts": [10, 20, 30, 40, 50, 60],
+  "comparison_node_count": 30,
+  "alpha": 0.9,
+  "beta": 0.86,
+  "lambda_loss": 2.5,
+  "default_preference_mean": 0.45,
+  "preference_std": 0.14,
+  "chi_values": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+  "gamma_values": [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
+  "repeats": 30,
+  "parameter_repeats": 100,
+  "output_dir": "outputs_py_decoy_sensitive"
+}

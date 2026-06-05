@@ -115,9 +115,10 @@ def paper_line_chart(
     fig, ax = plt.subplots(figsize=figsize, dpi=220)
     ax.grid(True)
     for index, (label, values) in enumerate(series):
+        plot_values = [np.nan if value is None else value for value in values]
         ax.plot(
             x_values if not x_as_labels else range(len(x_values)),
-            values,
+            plot_values,
             label=label,
             color=SERIES_COLORS[index % len(SERIES_COLORS)],
             marker=MARKERS[index % len(MARKERS)],
@@ -372,9 +373,10 @@ def paper_grouped_bar_chart(
     width = 0.8 / max(1, len(series))
     for index, (label, values) in enumerate(series):
         offset = (index - (len(series) - 1) / 2.0) * width
+        plot_values = [np.nan if value is None else value for value in values]
         ax.bar(
             positions + offset,
-            values,
+            plot_values,
             width=width,
             label=label,
             color=SERIES_COLORS[index % len(SERIES_COLORS)],

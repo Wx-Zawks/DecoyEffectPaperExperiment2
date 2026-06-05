@@ -1,0 +1,12 @@
+topic,status,note
+raw_results,passed,Simulation outputs are aggregated directly; calibration and forced ordering post-processing have been removed.
+display_scaling,documented,Utility plot fields use display_value = raw_value / 100; raw utility fields are preserved as *_raw.
+dim_strategy,documented,Primary DIM runs use strategy=F; Figure 3-8 still reports F/R/RF strategy comparisons.
+dim_secondary_bids,documented,DIM-derived rounds may allow secondary positive real-task bids when dim_allow_secondary_positive_bids=true; these bids are generated before allocation and are part of the raw bid book.
+selection_metrics,documented,Figure 3-6 plot fields use raw bid intensity for A/B/goal/compete and paired decoy-influenced node counts for tau_decoy; raw selection counts are preserved as tau_*_raw.
+participation_metrics,documented,Figure 4-2 uses raw participation intensity; unique participant counts are preserved as *_unique_participants_raw.
+paired_task_curves,documented,Figure 4-5 uses common-random-number task prefixes and reports standard errors; no monotonic smoothing is applied.
+representative_heatmap,documented,"Task-level bid/price heatmaps use the first repeat at comparison_node_count, not a ranking-optimized representative sample."
+truthfulness_DIM,passed,truthful bid maximizes utility in this fixed-bid scan
+truthfulness_PRM,passed,truthful bid maximizes utility in this fixed-bid scan
+truthfulness_TRAIM,failed,truthful bid is not utility-maximizing in this fixed-bid scan

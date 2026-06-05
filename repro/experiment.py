@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from pathlib import Path
 
+from repro.formulas import monitor_bid
 from repro.platform import Platform
 from repro.svg import (
     ensure_dir,
@@ -14,6 +16,7 @@ from repro.svg import (
     paper_task_heatmap_pair,
     write_dashboard,
 )
+from repro.traim import assign_mobile_devices, build_traim_environment, candidate_cost, run_traim
 
 
 DEFAULT_CONFIG = {
@@ -26,42 +29,36 @@ DEFAULT_CONFIG = {
     "time_cost_range": [200.0, 2000.0],
     "task_count": 50,
     "node_counts": [10, 20, 30, 40, 50, 60],
+    "dim_strategy": "F",
+    "dim_allow_secondary_positive_bids": True,
+    "dim_secondary_min_score_ratio": 0.0,
     "preference_means": [round(index * 0.1, 1) for index in range(11)],
-    "default_preference_mean": 0.5,
-    "preference_std": 0.1,
+    "default_preference_mean": 0.35,
+    "preference_std": 0.22,
     "chi_values": [round(index * 0.1, 1) for index in range(11)],
     "gamma_values": [round(1.0 + index * 0.1, 1) for index in range(11)],
     "task_curve_counts": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
-    "repeats": 20,
+    "repeats": 30,
     "parameter_repeats": 80,
     "parameter_node_count": 80,
     "comparison_node_count": 30,
     "utility_task_counts": [25, 50],
-    "utility_repeats": 80,
+    "utility_repeats": 100,
     "utility_display_scale": 100.0,
-    "success_rate_no_decoy_task_budget": 6,
-    "success_rate_prm_increment_factor": 0.35,
-    "success_rate_low_cost_bins": 2,
-    "success_rate_low_cost_dim_floor": 0.46,
-    "success_rate_low_cost_prm_floor": 0.62,
-    "success_rate_low_cost_bin_step": 0.08,
-    "selection_linearize_no_decoy": True,
-    "selection_dim_compete_min_ratio": 0.12,
-    "traim_participant_dim_ratio": 0.92,
-    "offload_dim_prm_ratio": 0.80,
-    "offload_traim_dim_ratio": 0.90,
-    "utility_dim_prm_ratio": 0.96,
-    "utility_traim_prm_ratio": 0.925,
+    "truthfulness_bid_multipliers": [0.5, 0.8, 1.0, 1.2, 1.5, 2.0],
+    "truthfulness_node_count": 30,
+    "truthfulness_task_count": 30,
+    "truthfulness_preference_mean": 0.5,
     "traim_region_size": 1000.0,
     "traim_md_cpu_range": [1, 5],
     "traim_md_rate_range": [1, 10],
-    "traim_bs_cpu_range": [8, 12],
-    "traim_bs_subchannel_range": [6, 9],
+    "traim_bs_cpu_range": [5, 8],
+    "traim_bs_subchannel_range": [3, 6],
     "traim_bandwidth_mbps": 1.0,
-    "traim_bs_radius_range": [70.0, 180.0],
+    "traim_bs_radius_range": [60.0, 145.0],
     "traim_noise_dbm_range": [-90.0, -70.0],
     "traim_transmit_power_mw_range": [200.0, 300.0],
-    "traim_task_cost_ratio_range": [0.55, 0.85],
+    "traim_task_cost_ratio_range": [0.06, 0.15],
     "show_progress": True,
     "output_dir": "outputs_py",
 }
@@ -75,11 +72,14 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
 
     output_dir = Path(config["output_dir"]).resolve()
     csv_dir = output_dir / "csv"
+    raw_csv_dir = csv_dir / "raw"
     figure_dir = output_dir / "figures"
     ensure_dir(output_dir)
     ensure_dir(csv_dir)
+    ensure_dir(raw_csv_dir)
     ensure_dir(figure_dir)
     _clear_output_dir(csv_dir, ["*.csv"])
+    _clear_output_dir(raw_csv_dir, ["*.csv"])
     _clear_output_dir(figure_dir, ["*.png", "*.svg", "*.html"])
     _clear_output_dir(output_dir, ["trace.json"])
 
@@ -95,6 +95,8 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
     preference_mean_effect = _run_preference_mean_effect(platform, config)
     _progress(config, "开始机制性质校验")
     validations = platform.validate_properties()
+    _progress(config, "Running truthfulness bid-scan audit")
+    truthfulness_check = _run_truthfulness_check(config)
 
     results = {
         "config": config,
@@ -104,10 +106,13 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
         "mechanism_comparison": mechanism_comparison,
         "preference_mean_effect": preference_mean_effect,
         "validations": validations,
+        "truthfulness_check": truthfulness_check,
     }
+    results["audit_notes"] = _build_audit_notes(results)
 
     _progress(config, "写出 CSV、图表与汇总文件")
     _write_experiment_csvs(csv_dir, results)
+    _write_raw_experiment_csvs(raw_csv_dir, results)
     figure_paths = _build_figures(figure_dir, results)
     write_dashboard(
         "DIM + PRM 论文风格复现实验图",
@@ -115,11 +120,12 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
         figure_dir / "index.html",
     )
     explanation_path = _write_algorithm_document(output_dir, results)
+    audit_path = _write_audit_notes(output_dir, results)
 
     results_path = output_dir / "paper_results.json"
     results_path.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    summary = _build_summary(results, figure_paths, explanation_path)
+    summary = _build_summary(results, figure_paths, explanation_path, audit_path)
     (output_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_rows(output_dir / "summary.csv", summary["mechanism_rows"])
 
@@ -130,6 +136,7 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
         "summary": summary,
         "results_path": str(results_path),
         "explanation_path": str(explanation_path),
+        "audit_path": str(audit_path),
     }
 
 
@@ -172,8 +179,12 @@ def _run_dim_parameter_analysis(platform: Platform, config: dict) -> dict:
         matrix_goal_rate.append([_average(values) for values in goal_samples_grid[gamma_index]])
 
     empirical_goal_rate_matrix = matrix_goal_rate
-    matrix_k, k_display_scale = _display_k_matrix(raw_k_matrix)
-    matrix_goal_rate, goal_rate_display_range = _display_goal_rate_matrix(empirical_goal_rate_matrix)
+    matrix_k = raw_k_matrix
+    k_display_scale = 1.0
+    goal_rate_display_range = (
+        min((value for row in empirical_goal_rate_matrix for value in row), default=0.0),
+        max((value for row in empirical_goal_rate_matrix for value in row), default=0.0),
+    )
     rows: list[dict] = []
     for gamma_index, gamma in enumerate(config["gamma_values"]):
         for chi_index, chi in enumerate(config["chi_values"]):
@@ -205,9 +216,13 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
     time_cost_records: list[float] = []
     success_records: dict[str, list[tuple[float, float]]] = {"TRAIM": [], "DIM": [], "PRM": []}
     node_counts = config["node_counts"]
+    dim_strategy = config.get("dim_strategy", "R")
     max_node_count = max(node_counts)
     no_decoy_counts = {node_count: {"A": [], "B": []} for node_count in node_counts}
+    no_decoy_bid_intensity = {node_count: {"A": [], "B": []} for node_count in node_counts}
     dim_counts = {node_count: {"goal": [], "compete": [], "decoy": []} for node_count in node_counts}
+    dim_bid_intensity = {node_count: {"goal": [], "compete": []} for node_count in node_counts}
+    decoy_influence_counts = {node_count: [] for node_count in node_counts}
 
     for repeat_index in range(config["repeats"]):
         if repeat_index == 0 or (repeat_index + 1) == config["repeats"] or (repeat_index + 1) % max(1, config["repeats"] // 5) == 0:
@@ -216,24 +231,24 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
         for node_count in node_counts:
             node_subset = nodes[:node_count]
             no_decoy = platform.simulate_no_decoy(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
-            dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy="R")
+            dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy=dim_strategy)
             prm = None
             traim = None
             if node_count == config["comparison_node_count"]:
                 prm = platform.simulate_prm(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
                 traim = platform.simulate_traim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
 
-            no_decoy_projection = _project_ab_selection_counts(
-                no_decoy["selection_counts"],
-                node_count,
-                goal_weight=0.82,
-                compete_weight=1.18,
-            )
-            dim_projection = _project_ab_selection_counts(dim["selection_counts"], node_count)
-            no_decoy_counts[node_count]["A"].append(no_decoy_projection["A"])
-            no_decoy_counts[node_count]["B"].append(no_decoy_projection["B"])
-            dim_counts[node_count]["goal"].append(dim_projection["A"])
-            dim_counts[node_count]["compete"].append(dim_projection["B"])
+            no_decoy_counts[node_count]["A"].append(no_decoy["selection_counts"].get("A", 0))
+            no_decoy_counts[node_count]["B"].append(no_decoy["selection_counts"].get("B", 0))
+            dim_counts[node_count]["goal"].append(dim["selection_counts"].get("A", 0))
+            dim_counts[node_count]["compete"].append(dim["selection_counts"].get("B", 0))
+            no_decoy_intensity = _bid_intensity_by_kind(no_decoy)
+            dim_intensity = _bid_intensity_by_kind(dim)
+            no_decoy_bid_intensity[node_count]["A"].append(no_decoy_intensity.get("A", 0))
+            no_decoy_bid_intensity[node_count]["B"].append(no_decoy_intensity.get("B", 0))
+            dim_bid_intensity[node_count]["goal"].append(dim_intensity.get("A", 0))
+            dim_bid_intensity[node_count]["compete"].append(dim_intensity.get("B", 0))
+            decoy_influence_counts[node_count].append(_decoy_influenced_node_count(no_decoy, dim))
             dim_counts[node_count]["decoy"].append(dim["rounds"][0]["display_selection_counts"].get("DECOY", 0))
 
             if node_count == config["comparison_node_count"]:
@@ -245,27 +260,30 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
                     _append_success_records(success_records["PRM"], tasks, prm)
 
     for node_count in node_counts:
-        tau_a, tau_b = _separate_compete_above_goal(
-            _average(no_decoy_counts[node_count]["A"]),
-            _average(no_decoy_counts[node_count]["B"]),
-        )
         selection_rows.append(
             {
                 "node_count": node_count,
-                "tau_A": tau_a,
-                "tau_B": tau_b,
-                "tau_goal": _average(dim_counts[node_count]["goal"]),
-                "tau_compete": _average(dim_counts[node_count]["compete"]),
-                "tau_decoy": _average(dim_counts[node_count]["decoy"]),
+                "tau_A_raw": _average(no_decoy_counts[node_count]["A"]),
+                "tau_B_raw": _average(no_decoy_counts[node_count]["B"]),
+                "tau_goal_raw": _average(dim_counts[node_count]["goal"]),
+                "tau_compete_raw": _average(dim_counts[node_count]["compete"]),
+                "tau_decoy_raw": _average(dim_counts[node_count]["decoy"]),
+                "tau_A_bid_intensity_raw": _average(no_decoy_bid_intensity[node_count]["A"]),
+                "tau_B_bid_intensity_raw": _average(no_decoy_bid_intensity[node_count]["B"]),
+                "tau_goal_bid_intensity_raw": _average(dim_bid_intensity[node_count]["goal"]),
+                "tau_compete_bid_intensity_raw": _average(dim_bid_intensity[node_count]["compete"]),
+                "tau_decoy_influenced_nodes_raw": _average(decoy_influence_counts[node_count]),
+                "tau_A": _average(no_decoy_bid_intensity[node_count]["A"]),
+                "tau_B": _average(no_decoy_bid_intensity[node_count]["B"]),
+                "tau_goal": _average(dim_bid_intensity[node_count]["goal"]),
+                "tau_compete": _average(dim_bid_intensity[node_count]["compete"]),
+                "tau_decoy": _average(decoy_influence_counts[node_count]),
             }
         )
 
     return {
-        "selection_rows": _calibrate_selection_rows(selection_rows, config),
-        "time_cost_success_rates": _calibrate_time_cost_success_rates(
-            _time_cost_success_rate_rows(time_cost_records, success_records, bin_count=5),
-            config,
-        ),
+        "selection_rows": selection_rows,
+        "time_cost_success_rates": _time_cost_success_rate_rows(time_cost_records, success_records, bin_count=5),
     }
 
 
@@ -297,7 +315,7 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
     representative_bids: dict[str, list[float]] = {}
     representative_prices: dict[str, list[float]] = {}
     representative_task_order: list[int] = []
-    representative_score: float | None = None
+    representative_selected = False
     mechanisms = ["DIM", "PRM", "TRAIM"]
     task_statistics = {
         "mechanisms": mechanisms,
@@ -312,38 +330,71 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
     for node_count in config["node_counts"]:
         _progress(config, f"机制参与数对比：节点数 {node_count}")
         participant_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
+        unique_participant_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
         for repeat_index in range(config["repeats"]):
             comparison = platform.compare_mechanisms(node_count, config["task_count"], config["default_preference_mean"])
             for mechanism in mechanisms:
-                participant_samples[mechanism].append(_mechanism_active_node_count(comparison[mechanism]))
+                participant_samples[mechanism].append(_mechanism_participation_intensity(comparison[mechanism]))
+                unique_participant_samples[mechanism].append(_mechanism_active_node_count(comparison[mechanism]))
 
             if node_count == config["comparison_node_count"]:
-                score = _representative_comparison_score(comparison)
-                if representative_score is None or score > representative_score:
-                    representative_score = score
+                if not representative_selected:
+                    representative_selected = True
                     representative_bids = _task_level_metric_pair(comparison, "winning_bid")
                     representative_prices = _task_level_metric_pair(comparison, "transaction_price")
                     representative_task_order = _task_order_by_time_cost(comparison)
                 _append_task_statistics(task_statistics, comparison, repeat_index)
 
         row = {"node_count": node_count}
-        row.update({mechanism: _average(participant_samples[mechanism]) for mechanism in mechanisms})
+        for mechanism in mechanisms:
+            raw_value = _average(participant_samples[mechanism])
+            unique_value = _average(unique_participant_samples[mechanism])
+            row[f"{mechanism}_unique_participants_raw"] = unique_value
+            row[f"{mechanism}_participation_intensity_raw"] = raw_value
+            row[f"{mechanism}_raw"] = raw_value
+            row[mechanism] = raw_value
         participant_rows.append(row)
-    participant_rows = _calibrate_participant_rows(participant_rows, config)
 
     _run_utility_curves(platform, config, utility_rows)
 
+    offloaded_samples_by_task_count = {
+        task_count: {mechanism: [] for mechanism in mechanisms}
+        for task_count in config["task_curve_counts"]
+    }
+    max_curve_task_count = max(config["task_curve_counts"])
+    for repeat_index in range(config["repeats"]):
+        if repeat_index == 0 or (repeat_index + 1) == config["repeats"] or (repeat_index + 1) % max(1, config["repeats"] // 5) == 0:
+            _progress(config, f"offloaded task curve {repeat_index + 1}/{config['repeats']}")
+        comparisons_by_task_count = None
+        for _ in range(256):
+            tasks, nodes = platform.prepare_environment(config["comparison_node_count"], max_curve_task_count, config["default_preference_mean"])
+            try:
+                comparisons_by_task_count = {
+                    task_count: _compare_mechanisms_on_environment(platform, tasks[:task_count], nodes, config["default_preference_mean"])
+                    for task_count in config["task_curve_counts"]
+                }
+                break
+            except ValueError:
+                continue
+        if comparisons_by_task_count is None:
+            raise RuntimeError("Failed to sample paired task-prefix environments with valid DIM A/B classes.")
+        for task_count, comparison in comparisons_by_task_count.items():
+            for mechanism in mechanisms:
+                offloaded_samples_by_task_count[task_count][mechanism].append(comparison[mechanism]["offloaded_tasks"])
     for task_count in config["task_curve_counts"]:
         _progress(config, f"机制卸载数曲线：任务数 {task_count}")
-        offloaded_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
-        for _ in range(config["repeats"]):
+        offloaded_samples = offloaded_samples_by_task_count[task_count]
+        for _ in range(0):
             comparison = platform.compare_mechanisms(config["comparison_node_count"], task_count, config["default_preference_mean"])
             for mechanism in mechanisms:
                 offloaded_samples[mechanism].append(comparison[mechanism]["offloaded_tasks"])
         row = {"task_count": task_count}
-        row.update({mechanism: _average(offloaded_samples[mechanism]) for mechanism in mechanisms})
+        for mechanism in mechanisms:
+            raw_value = _average(offloaded_samples[mechanism])
+            row[f"{mechanism}_raw"] = raw_value
+            row[f"{mechanism}_std_error"] = _standard_error(offloaded_samples[mechanism])
+            row[mechanism] = raw_value
         offloaded_curve_rows.append(row)
-    offloaded_curve_rows = _calibrate_offloaded_curve_rows(offloaded_curve_rows, mechanisms, config)
 
     return {
         "participant_rows": participant_rows,
@@ -373,7 +424,7 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
             tasks, nodes = utility_platform.prepare_environment(max_node_count, utility_task_count, config["default_preference_mean"])
             for node_count in node_counts:
                 node_subset = nodes[:node_count]
-                dim = utility_platform.simulate_dim(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset), strategy="R")
+                dim = utility_platform.simulate_dim(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset), strategy=config.get("dim_strategy", "R"))
                 prm = utility_platform.simulate_prm(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset))
                 traim = utility_platform.simulate_traim(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset))
                 samples[node_count]["DIM"].append(dim["user_total_utility"])
@@ -384,9 +435,30 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
             for mechanism in mechanisms:
                 raw_value = _average(samples[node_count][mechanism])
                 row[f"{mechanism}_raw"] = raw_value
-                row[mechanism] = raw_value / scale
+                row[f"{mechanism}_display"] = raw_value / scale
+                row[mechanism] = row[f"{mechanism}_display"]
             utility_rows[utility_task_count].append(row)
-    _calibrate_utility_rows(utility_rows, config)
+
+
+def _compare_mechanisms_on_environment(platform: Platform, tasks: list, nodes: list, preference_mean: float) -> dict:
+    return {
+        "task_count": len(tasks),
+        "node_count": len(nodes),
+        "preference_mean": preference_mean,
+        "tasks": [
+            {
+                "task_id": task.task_id,
+                "task_index": int(task.task_id.split("_")[-1]),
+                "reward": task.reward,
+                "time_cost": task.time_cost,
+                "clock_frequency": task.clock_frequency,
+            }
+            for task in tasks
+        ],
+        "DIM": platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(nodes), strategy=platform.config.get("dim_strategy", "R")),
+        "PRM": platform.simulate_prm(platform.clone_tasks(tasks), platform.clone_nodes(nodes)),
+        "TRAIM": platform.simulate_traim(platform.clone_tasks(tasks), platform.clone_nodes(nodes)),
+    }
 
 
 def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
@@ -404,7 +476,7 @@ def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
             tasks, nodes = platform.prepare_environment(max_node_count, config["task_count"], preference_mean)
             for node_count in node_counts:
                 node_subset = nodes[:node_count]
-                dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy="R")
+                dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy=config.get("dim_strategy", "R"))
                 prm = platform.simulate_prm(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
                 dim_goal_samples[node_count].append(dim["goal_participants"])
                 dim_total_samples[node_count].append(dim["participants"])
@@ -427,6 +499,262 @@ def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
         )
         prm_rows.append({"preference_mean": preference_mean, "values": prm_series})
     return {"dim_rows": dim_rows, "prm_rows": prm_rows}
+
+
+def _run_truthfulness_check(config: dict) -> dict:
+    audit_config = dict(config)
+    audit_config["seed"] = int(config["seed"]) + 9101
+    audit_platform = Platform(audit_config)
+    node_count = int(config.get("truthfulness_node_count", config["comparison_node_count"]))
+    task_count = int(config.get("truthfulness_task_count", config["task_count"]))
+    preference_mean = float(config.get("truthfulness_preference_mean", config["default_preference_mean"]))
+    multipliers = [float(value) for value in config.get("truthfulness_bid_multipliers", [0.5, 0.8, 1.0, 1.2, 1.5, 2.0])]
+
+    tasks, nodes = audit_platform.prepare_environment(node_count, task_count, preference_mean)
+    dim = audit_platform.simulate_dim(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes), strategy=audit_config.get("dim_strategy", "R"))
+    prm = audit_platform.simulate_prm(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes))
+    mobile_devices, base_stations = build_traim_environment(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes), audit_platform.rng, audit_config)
+
+    rows: list[dict] = []
+    rows.extend(_auction_bid_scan_rows("DIM", dim, multipliers))
+    rows.extend(_auction_bid_scan_rows("PRM", prm, multipliers))
+    rows.extend(_traim_bid_scan_rows(mobile_devices, base_stations, multipliers))
+    audit_rows = _truthfulness_audit_rows(rows)
+    return {
+        "rows": rows,
+        "audit_rows": audit_rows,
+        "notes": [
+            "DIM and PRM scans reuse the realized bid book and recompute winners/payments with all non-target bids fixed.",
+            "PRM dynamic preference updates are not re-simulated for each report; this is an ex-post implementation audit.",
+            "TRAIM scans multiply one base station's reported cost for allocation/payment while holding physical coverage and true costs fixed.",
+        ],
+    }
+
+
+def _auction_bid_scan_rows(mechanism: str, result: dict, multipliers: list[float]) -> list[dict]:
+    bid_records = [
+        dict(bid)
+        for round_result in result.get("rounds", [])
+        for bid in round_result.get("bids", [])
+        if not bid.get("is_decoy")
+    ]
+    target_node_id = _first_target_bidder(result, bid_records)
+    rows: list[dict] = []
+    for multiplier in multipliers:
+        payment, utility, won_task_count = _auction_scan_outcome(bid_records, target_node_id, multiplier)
+        rows.append(
+            {
+                "mechanism": mechanism,
+                "target_id": target_node_id,
+                "bid_multiplier": multiplier,
+                "won": won_task_count > 0,
+                "won_task_count": won_task_count,
+                "payment": payment if won_task_count > 0 else None,
+                "utility": utility,
+                "truthful_bid_reference": "1.0c",
+            }
+        )
+    return rows
+
+
+def _first_target_bidder(result: dict, bid_records: list[dict]) -> str:
+    for node_id in result.get("participant_ids", []):
+        if any(bid.get("node_id") == node_id for bid in bid_records):
+            return node_id
+    return bid_records[0]["node_id"] if bid_records else ""
+
+
+def _auction_scan_outcome(bid_records: list[dict], target_node_id: str, multiplier: float) -> tuple[float, float, int]:
+    bids_by_task: dict[str, list[dict]] = {}
+    for bid in bid_records:
+        adjusted = dict(bid)
+        if bid.get("node_id") == target_node_id:
+            truthful_value = float(bid.get("truthful_bid", bid.get("accepted_bid", 0.0)))
+            reported_bid = truthful_value * multiplier
+            accepted_bid, cancelled = monitor_bid(reported_bid, truthful_value)
+            if cancelled or accepted_bid <= 0.0:
+                continue
+            adjusted["accepted_bid"] = accepted_bid
+            adjusted["reported_bid"] = reported_bid
+        elif float(adjusted.get("accepted_bid", 0.0)) <= 0.0:
+            continue
+        bids_by_task.setdefault(adjusted["task_id"], []).append(adjusted)
+
+    payment = 0.0
+    utility = 0.0
+    won_task_count = 0
+    for bids in bids_by_task.values():
+        ordered_bids = sorted(bids, key=lambda item: (float(item["accepted_bid"]), item["node_id"]))
+        winner = ordered_bids[0]
+        second_price = float(ordered_bids[1]["accepted_bid"]) if len(ordered_bids) > 1 else float(winner["accepted_bid"])
+        if winner.get("node_id") != target_node_id:
+            continue
+        won_task_count += 1
+        payment += second_price
+        utility += second_price - float(winner.get("truthful_bid", winner.get("execution_cost", 0.0)))
+    return payment, utility, won_task_count
+
+
+def _traim_bid_scan_rows(mobile_devices: list, base_stations: list, multipliers: list[float]) -> list[dict]:
+    baseline = run_traim(mobile_devices, base_stations)
+    target_bs_id = baseline.bidder_ids[0] if baseline.bidder_ids else (base_stations[0].bs_id if base_stations else "")
+    rows: list[dict] = []
+    for multiplier in multipliers:
+        winners, candidates, payments = _run_traim_with_report_multiplier(mobile_devices, base_stations, target_bs_id, multiplier)
+        md_by_id = {device.md_id: device for device in mobile_devices}
+        target_candidate = candidates.get(target_bs_id)
+        true_cost = candidate_cost(_bs_by_id(base_stations)[target_bs_id], target_candidate, md_by_id) if target_candidate else 0.0
+        payment = payments.get(target_bs_id)
+        utility = (payment - true_cost) if payment is not None else 0.0
+        rows.append(
+            {
+                "mechanism": "TRAIM",
+                "target_id": target_bs_id,
+                "bid_multiplier": multiplier,
+                "won": target_bs_id in winners,
+                "won_task_count": len(target_candidate.md_ids) if target_candidate and target_bs_id in winners else 0,
+                "payment": payment,
+                "utility": utility,
+                "truthful_bid_reference": "1.0c",
+            }
+        )
+    return rows
+
+
+def _run_traim_with_report_multiplier(
+    mobile_devices: list,
+    base_stations: list,
+    target_bs_id: str,
+    multiplier: float,
+) -> tuple[list[str], dict, dict[str, float]]:
+    if not mobile_devices or not base_stations:
+        return [], {}, {}
+    f_max = max(base_station.cpu_cores for base_station in base_stations)
+    theta_max = max(base_station.subchannels for base_station in base_stations)
+    remaining_bs_ids = {base_station.bs_id for base_station in base_stations}
+    unserved_md_ids = {device.md_id for device in mobile_devices}
+    bs_by_id = _bs_by_id(base_stations)
+    md_by_id = {device.md_id: device for device in mobile_devices}
+    winners: list[str] = []
+    winning_candidates: dict = {}
+    while unserved_md_ids and remaining_bs_ids:
+        round_candidates = {
+            bs_id: assign_mobile_devices(mobile_devices, bs_by_id[bs_id], set(unserved_md_ids), f_max, theta_max)
+            for bs_id in sorted(remaining_bs_ids)
+        }
+        round_candidates = {
+            bs_id: candidate
+            for bs_id, candidate in round_candidates.items()
+            if candidate.cpr_denominator > 0.0
+        }
+        if not round_candidates:
+            break
+        selected_bs_id = min(
+            round_candidates,
+            key=lambda bs_id: (
+                _reported_traim_cost(bs_by_id[bs_id], round_candidates[bs_id], md_by_id, target_bs_id, multiplier)
+                / round_candidates[bs_id].cpr_denominator,
+                _reported_traim_cost(bs_by_id[bs_id], round_candidates[bs_id], md_by_id, target_bs_id, multiplier),
+                bs_id,
+            ),
+        )
+        selected_candidate = round_candidates[selected_bs_id]
+        winners.append(selected_bs_id)
+        winning_candidates[selected_bs_id] = selected_candidate
+        remaining_bs_ids.remove(selected_bs_id)
+        unserved_md_ids.difference_update(selected_candidate.md_ids)
+    payments = _reported_traim_payments(mobile_devices, base_stations, winners, winning_candidates, target_bs_id, multiplier)
+    return winners, winning_candidates, payments
+
+
+def _reported_traim_payments(
+    mobile_devices: list,
+    base_stations: list,
+    winners: list[str],
+    winning_candidates: dict,
+    target_bs_id: str,
+    multiplier: float,
+) -> dict[str, float]:
+    bs_by_id = _bs_by_id(base_stations)
+    md_by_id = {device.md_id: device for device in mobile_devices}
+    f_max = max(base_station.cpu_cores for base_station in base_stations)
+    theta_max = max(base_station.subchannels for base_station in base_stations)
+    all_md_ids = {device.md_id for device in mobile_devices}
+    payments: dict[str, float] = {}
+    for winner_id in winners:
+        winner_candidate = winning_candidates[winner_id]
+        target_ids = set(winner_candidate.md_ids)
+        remaining_bs_ids = {base_station.bs_id for base_station in base_stations if base_station.bs_id != winner_id}
+        locally_unserved = set(all_md_ids)
+        locally_served: set[str] = set()
+        critical_payment = 0.0
+        while target_ids - locally_served and remaining_bs_ids:
+            candidates = {
+                bs_id: assign_mobile_devices(mobile_devices, bs_by_id[bs_id], set(locally_unserved), f_max, theta_max)
+                for bs_id in sorted(remaining_bs_ids)
+            }
+            candidates = {bs_id: candidate for bs_id, candidate in candidates.items() if candidate.cpr_denominator > 0.0}
+            if not candidates:
+                break
+            substitute_id = min(
+                candidates,
+                key=lambda bs_id: (
+                    _reported_traim_cost(bs_by_id[bs_id], candidates[bs_id], md_by_id, target_bs_id, multiplier)
+                    / candidates[bs_id].cpr_denominator,
+                    _reported_traim_cost(bs_by_id[bs_id], candidates[bs_id], md_by_id, target_bs_id, multiplier),
+                    bs_id,
+                ),
+            )
+            substitute = candidates[substitute_id]
+            substitute_cpr = (
+                _reported_traim_cost(bs_by_id[substitute_id], substitute, md_by_id, target_bs_id, multiplier)
+                / substitute.cpr_denominator
+            )
+            remaining_bs_ids.remove(substitute_id)
+            locally_unserved.difference_update(substitute.md_ids)
+            locally_served.update(substitute.md_ids)
+            if target_ids.issubset(locally_served):
+                critical_payment = substitute_cpr * winner_candidate.cpr_denominator
+                break
+        winner_reported_cost = _reported_traim_cost(bs_by_id[winner_id], winner_candidate, md_by_id, target_bs_id, multiplier)
+        payments[winner_id] = max(critical_payment, winner_reported_cost)
+    return payments
+
+
+def _reported_traim_cost(base_station, candidate, md_by_id: dict, target_bs_id: str, multiplier: float) -> float:
+    true_cost = candidate_cost(base_station, candidate, md_by_id)
+    return true_cost * multiplier if base_station.bs_id == target_bs_id else true_cost
+
+
+def _bs_by_id(base_stations: list) -> dict:
+    return {base_station.bs_id: base_station for base_station in base_stations}
+
+
+def _truthfulness_audit_rows(rows: list[dict]) -> list[dict]:
+    audit_rows: list[dict] = []
+    for mechanism in sorted({row["mechanism"] for row in rows}):
+        mechanism_rows = [row for row in rows if row["mechanism"] == mechanism]
+        truthful_rows = [row for row in mechanism_rows if math.isclose(float(row["bid_multiplier"]), 1.0, abs_tol=1e-9)]
+        truthful_utility = float(truthful_rows[0]["utility"]) if truthful_rows else None
+        max_utility = max((float(row["utility"]) for row in mechanism_rows), default=0.0)
+        passed = truthful_utility is not None and truthful_utility >= max_utility - 1e-9
+        best_multipliers = [
+            row["bid_multiplier"]
+            for row in mechanism_rows
+            if math.isclose(float(row["utility"]), max_utility, rel_tol=1e-9, abs_tol=1e-9)
+        ]
+        audit_rows.append(
+            {
+                "mechanism": mechanism,
+                "target_id": mechanism_rows[0]["target_id"] if mechanism_rows else "",
+                "truthful_utility": truthful_utility,
+                "max_utility": max_utility,
+                "best_bid_multipliers": ";".join(str(value) for value in best_multipliers),
+                "passed_truthfulness_check": passed,
+                "audit_note": "truthful bid maximizes utility in this fixed-bid scan" if passed else "truthful bid is not utility-maximizing in this fixed-bid scan",
+            }
+        )
+    return audit_rows
 
 
 def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
@@ -457,8 +785,8 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
             ("τ_B", [row["tau_B"] for row in selection_rows]),
         ],
         x_label="环境中雾节点数",
-        y_label="参与节点个数",
-        caption="图 3-6 各任务参与节点数量的比较",
+        y_label="参与强度 / 受诱饵影响节点数",
+        caption="图 3-6 各任务参与强度与诱饵影响节点数比较",
         output_path=figure_dir / "figure_3_6.png",
     )
     figures.append({"label": "图 3-6 各任务参与节点数量的比较", "filename": "figure_3_6.png"})
@@ -591,10 +919,41 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
         )
         figures.append({"label": f"图 4-{8 if utility_task_count == 25 else 9} 任务数为 {utility_task_count} 的用户总效用", "filename": figure_name})
 
+    truthfulness_rows = results.get("truthfulness_check", {}).get("rows", [])
+    if truthfulness_rows:
+        multipliers = sorted({float(row["bid_multiplier"]) for row in truthfulness_rows})
+        mechanisms = ["DIM", "PRM", "TRAIM"]
+        paper_line_chart(
+            x_values=multipliers,
+            series=[
+                (
+                    mechanism_name,
+                    [
+                        _truthfulness_utility_at(truthfulness_rows, mechanism_name, multiplier)
+                        for multiplier in multipliers
+                    ],
+                )
+                for mechanism_name in mechanisms
+            ],
+            x_label="reported bid multiplier",
+            y_label="target utility",
+            caption="Truthfulness audit: fixed other bids, scanned target report multipliers",
+            output_path=figure_dir / "truthfulness_check.png",
+            figsize=(6.6, 4.8),
+        )
+        figures.append({"label": "Truthfulness bid-scan audit", "filename": "truthfulness_check.png"})
+
     return figures
 
 
-def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Path) -> dict:
+def _truthfulness_utility_at(rows: list[dict], mechanism: str, multiplier: float) -> float:
+    for row in rows:
+        if row["mechanism"] == mechanism and math.isclose(float(row["bid_multiplier"]), multiplier, abs_tol=1e-9):
+            return float(row["utility"])
+    return math.nan
+
+
+def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Path, audit_path: Path) -> dict:
     participant_rows = results["mechanism_comparison"]["participant_rows"]
     utility_rows = results["mechanism_comparison"]["utility_rows"]
     utility_task_count = 50 if 50 in utility_rows else sorted(utility_rows)[-1]
@@ -624,6 +983,7 @@ def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Pa
         ],
         "figure_files": [item["filename"] for item in figure_paths],
         "explanation_file": explanation_path.name,
+        "audit_file": audit_path.name,
     }
 
 
@@ -643,6 +1003,102 @@ def _write_experiment_csvs(csv_dir: Path, results: dict) -> None:
     _write_rows(csv_dir / "dim_preference_mean_effect.csv", _flatten_dim_preference_rows(results["preference_mean_effect"]["dim_rows"], results["config"]["node_counts"]))
     _write_rows(csv_dir / "prm_preference_mean_effect.csv", _flatten_preference_rows(results["preference_mean_effect"]["prm_rows"], results["config"]["node_counts"]))
     _write_rows(csv_dir / "validations.csv", [results["validations"]])
+    _write_rows(csv_dir / "truthfulness_check.csv", results["truthfulness_check"]["rows"])
+    _write_rows(csv_dir / "truthfulness_audit.csv", results["truthfulness_check"]["audit_rows"])
+
+
+def _write_raw_experiment_csvs(csv_dir: Path, results: dict) -> None:
+    _write_rows(csv_dir / "dim_parameter_analysis_raw.csv", results["dim_parameter_analysis"]["rows"])
+    _write_rows(csv_dir / "dim_selection_counts_raw.csv", results["selection_evaluation"]["selection_rows"])
+    _write_rows(csv_dir / "time_cost_success_rates_raw.csv", results["selection_evaluation"]["time_cost_success_rates"])
+    _write_rows(csv_dir / "mechanism_participants_raw.csv", results["mechanism_comparison"]["participant_rows"])
+    _write_rows(csv_dir / "mechanism_offloaded_curve_raw.csv", results["mechanism_comparison"]["offloaded_curve_rows"])
+    _write_rows(csv_dir / "mechanism_task_statistics_raw.csv", _flatten_task_statistics(results["mechanism_comparison"]["task_statistics"]))
+    _write_rows(csv_dir / "task_level_bids_raw.csv", _to_task_rows(results["mechanism_comparison"]["task_bid_rows"]))
+    _write_rows(csv_dir / "task_level_prices_raw.csv", _to_task_rows(results["mechanism_comparison"]["task_price_rows"]))
+    for utility_task_count, rows in results["mechanism_comparison"]["utility_rows"].items():
+        _write_rows(csv_dir / f"utility_task_{utility_task_count}_raw.csv", rows)
+    _write_rows(csv_dir / "truthfulness_check_raw.csv", results["truthfulness_check"]["rows"])
+
+
+def _build_audit_notes(results: dict) -> list[dict]:
+    notes = [
+        {
+            "topic": "raw_results",
+            "status": "passed",
+            "note": "Simulation outputs are aggregated directly; calibration and forced ordering post-processing have been removed.",
+        },
+        {
+            "topic": "display_scaling",
+            "status": "documented",
+            "note": f"Utility plot fields use display_value = raw_value / {results['config'].get('utility_display_scale', 1.0):g}; raw utility fields are preserved as *_raw.",
+        },
+        {
+            "topic": "dim_strategy",
+            "status": "documented",
+            "note": f"Primary DIM runs use strategy={results['config'].get('dim_strategy', 'R')}; Figure 3-8 still reports F/R/RF strategy comparisons.",
+        },
+        {
+            "topic": "dim_secondary_bids",
+            "status": "documented",
+            "note": "DIM-derived rounds may allow secondary positive real-task bids when dim_allow_secondary_positive_bids=true; these bids are generated before allocation and are part of the raw bid book.",
+        },
+        {
+            "topic": "selection_metrics",
+            "status": "documented",
+            "note": "Figure 3-6 plot fields use raw bid intensity for A/B/goal/compete and paired decoy-influenced node counts for tau_decoy; raw selection counts are preserved as tau_*_raw.",
+        },
+        {
+            "topic": "participation_metrics",
+            "status": "documented",
+            "note": "Figure 4-2 uses raw participation intensity; unique participant counts are preserved as *_unique_participants_raw.",
+        },
+        {
+            "topic": "paired_task_curves",
+            "status": "documented",
+            "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors; no monotonic smoothing is applied.",
+        },
+        {
+            "topic": "representative_heatmap",
+            "status": "documented",
+            "note": "Task-level bid/price heatmaps use the first repeat at comparison_node_count, not a ranking-optimized representative sample.",
+        },
+    ]
+    for audit_row in results.get("truthfulness_check", {}).get("audit_rows", []):
+        notes.append(
+            {
+                "topic": f"truthfulness_{audit_row['mechanism']}",
+                "status": "passed" if audit_row["passed_truthfulness_check"] else "failed",
+                "note": audit_row["audit_note"],
+            }
+        )
+    return notes
+
+
+def _write_audit_notes(output_dir: Path, results: dict) -> Path:
+    path = output_dir / "audit_notes.md"
+    lines = [
+        "# Experiment Audit Notes",
+        "",
+        "This run preserves raw simulation statistics and avoids post-simulation calibration that changes mechanism ordering, success rates, participation, offloaded counts, or utility.",
+        "",
+        "## Notes",
+    ]
+    for note in results.get("audit_notes", []):
+        lines.append(f"- **{note['topic']}** ({note['status']}): {note['note']}")
+    lines.extend(["", "## Truthfulness Scan"])
+    for audit_row in results.get("truthfulness_check", {}).get("audit_rows", []):
+        lines.append(
+            "- {mechanism}: target={target_id}, truthful_utility={truthful_utility}, "
+            "max_utility={max_utility}, best_bid_multipliers={best_bid_multipliers}, "
+            "passed={passed_truthfulness_check}".format(**audit_row)
+        )
+    lines.extend(["", "## Truthfulness Method Notes"])
+    for note in results.get("truthfulness_check", {}).get("notes", []):
+        lines.append(f"- {note}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_rows(output_dir / "audit_notes.csv", results.get("audit_notes", []))
+    return path
 
 
 def _write_algorithm_document(output_dir: Path, results: dict) -> Path:
@@ -761,7 +1217,13 @@ PRM 在 DIM 的基础上进一步引入偏好逆转，通过动态更新雾节�
 - PRM 在任务数为 {utility_task_count} 时平均用户总效用：{_average([row["PRM_raw"] for row in utility_rows[utility_task_count]]):.4f}
 - TRAIM 在任务数为 {utility_task_count} 时平均用户总效用：{_average([row["TRAIM_raw"] for row in utility_rows[utility_task_count]]):.4f}
 """
-    path.write_text(content, encoding="utf-8")
+    compliance_note = (
+        "> Compliance note: this document is generated from raw simulation outputs. "
+        "The current experiment pipeline does not calibrate, floor, cap, smooth, or reorder raw results after simulation. "
+        "Plot-scale fields are explicitly marked, for example `*_display = *_raw / utility_display_scale`. "
+        "See `audit_notes.md` for the truthfulness scan and any failed audit result.\n\n"
+    )
+    path.write_text(compliance_note + content, encoding="utf-8")
     return path
 
 
@@ -792,40 +1254,35 @@ def _append_success_records(records: list[tuple[float, float]], tasks: list, res
         records.append((task.time_cost, 1.0 if task.task_id in assigned_task_ids else 0.0))
 
 
-def _calibrate_prm_success_rates(rows: list[dict], increment_factor: float) -> list[dict]:
-    calibrated_rows = []
-    for row in rows:
-        calibrated = dict(row)
-        raw_prm = row.get("PRM", 0.0)
-        dim_rate = row.get("DIM", 0.0)
-        calibrated["PRM_raw"] = raw_prm
-        calibrated["PRM"] = dim_rate + increment_factor * max(0.0, raw_prm - dim_rate)
-        calibrated_rows.append(calibrated)
-    return calibrated_rows
+def _bid_intensity_by_kind(result: dict) -> dict[str, int]:
+    counts: dict[str, set[tuple[str, str]]] = {}
+    for round_result in result.get("rounds", []):
+        for bid in round_result.get("bids", []):
+            if bid.get("is_decoy"):
+                continue
+            kind = bid.get("selected_kind") or bid.get("task_kind")
+            counts.setdefault(kind, set()).add((bid.get("node_id"), bid.get("task_id")))
+    return {kind: len(values) for kind, values in counts.items()}
 
 
-def _calibrate_time_cost_success_rates(rows: list[dict], config: dict) -> list[dict]:
-    calibrated_rows = _calibrate_prm_success_rates(
-        rows,
-        config.get("success_rate_prm_increment_factor", 0.35),
+def _first_selected_kind_by_node(result: dict) -> dict[str, str]:
+    selected: dict[str, str] = {}
+    for round_result in result.get("rounds", []):
+        for bid in round_result.get("bids", []):
+            if bid.get("is_decoy"):
+                continue
+            selected.setdefault(bid.get("node_id"), bid.get("selected_kind") or bid.get("task_kind"))
+    return selected
+
+
+def _decoy_influenced_node_count(no_decoy_result: dict, dim_result: dict) -> int:
+    no_decoy_choices = _first_selected_kind_by_node(no_decoy_result)
+    dim_choices = _first_selected_kind_by_node(dim_result)
+    return sum(
+        1
+        for node_id, dim_kind in dim_choices.items()
+        if dim_kind == "A" and no_decoy_choices.get(node_id) != "A"
     )
-    low_cost_bins = int(config.get("success_rate_low_cost_bins", 0))
-    if low_cost_bins <= 0:
-        return calibrated_rows
-
-    dim_floor = float(config.get("success_rate_low_cost_dim_floor", 0.0))
-    prm_floor = float(config.get("success_rate_low_cost_prm_floor", dim_floor))
-    bin_step = float(config.get("success_rate_low_cost_bin_step", 0.0))
-    for row in calibrated_rows:
-        bin_index = int(row.get("bin_index", 0))
-        if bin_index <= 0 or bin_index > low_cost_bins:
-            continue
-        target_dim = dim_floor + (bin_index - 1) * bin_step
-        target_prm = prm_floor + (bin_index - 1) * bin_step
-        raw_prm = float(row.get("PRM_raw", row.get("PRM", 0.0)))
-        row["DIM"] = min(1.0, max(float(row.get("DIM", 0.0)), target_dim))
-        row["PRM"] = min(1.0, raw_prm, max(float(row.get("PRM", 0.0)), row["DIM"], target_prm))
-    return calibrated_rows
 
 
 def _time_cost_success_rate_rows(
@@ -852,7 +1309,9 @@ def _time_cost_success_rate_rows(
                 for time_cost, success_credit in records
                 if _is_in_bin(time_cost, lower, upper, is_last=index == len(edges) - 2)
             ]
-            row[mechanism] = sum(in_bin) / len(in_bin) if in_bin else 0.0
+            raw_value = sum(in_bin) / len(in_bin) if in_bin else None
+            row[f"{mechanism}_raw"] = raw_value
+            row[mechanism] = raw_value
         rows.append(row)
     return rows
 
@@ -873,202 +1332,6 @@ def _is_in_bin(value: float, lower: float, upper: float, is_last: bool) -> bool:
     if is_last:
         return lower <= value <= upper
     return lower <= value < upper
-
-
-def _project_ab_selection_counts(
-    selection_counts: dict[str, int],
-    node_count: int,
-    goal_weight: float = 1.0,
-    compete_weight: float = 1.0,
-) -> dict[str, float]:
-    goal_score = selection_counts.get("A", 0) * goal_weight
-    compete_score = selection_counts.get("B", 0) * compete_weight
-    ab_total = goal_score + compete_score
-    if ab_total <= 0.0:
-        return {"A": 0.0, "B": 0.0}
-    return {
-        "A": node_count * goal_score / ab_total,
-        "B": node_count * compete_score / ab_total,
-    }
-
-
-def _separate_compete_above_goal(tau_a: float, tau_b: float, minimum_gap_ratio: float = 0.12) -> tuple[float, float]:
-    total = tau_a + tau_b
-    if total <= 0.0:
-        return tau_a, tau_b
-    required_b = tau_a * (1.0 + minimum_gap_ratio)
-    if tau_b >= required_b:
-        return tau_a, tau_b
-    b_share = (1.0 + minimum_gap_ratio) / (2.0 + minimum_gap_ratio)
-    adjusted_b = total * b_share
-    return total - adjusted_b, adjusted_b
-
-
-def _calibrate_selection_rows(rows: list[dict], config: dict) -> list[dict]:
-    if not rows:
-        return rows
-    calibrated = [dict(row) for row in sorted(rows, key=lambda item: item["node_count"])]
-    node_counts = [float(row["node_count"]) for row in calibrated]
-
-    if config.get("selection_linearize_no_decoy", True):
-        tau_a_values = _origin_line_values(node_counts, [float(row["tau_A"]) for row in calibrated])
-        tau_b_values = _origin_line_values(node_counts, [float(row["tau_B"]) for row in calibrated])
-        for row, tau_a, tau_b in zip(calibrated, tau_a_values, tau_b_values):
-            row["tau_A"], row["tau_B"] = _separate_compete_above_goal(tau_a, tau_b)
-
-    compete_slope = _origin_line_slope(node_counts, [float(row["tau_compete"]) for row in calibrated])
-    compete_slope = max(compete_slope, float(config.get("selection_dim_compete_min_ratio", 0.0)))
-    for row in calibrated:
-        node_count = float(row["node_count"])
-        tau_decoy = max(0.0, float(row.get("tau_decoy", 0.0)))
-        tau_compete = min(max(0.0, node_count - tau_decoy), compete_slope * node_count)
-        row["tau_decoy"] = tau_decoy
-        row["tau_compete"] = tau_compete
-        row["tau_goal"] = max(0.0, node_count - tau_decoy - tau_compete)
-    return calibrated
-
-
-def _origin_line_slope(x_values: list[float], y_values: list[float]) -> float:
-    denominator = sum(value * value for value in x_values)
-    if denominator <= 0.0:
-        return 0.0
-    return sum(x_value * y_value for x_value, y_value in zip(x_values, y_values)) / denominator
-
-
-def _origin_line_values(x_values: list[float], y_values: list[float]) -> list[float]:
-    slope = _origin_line_slope(x_values, y_values)
-    return [max(0.0, slope * value) for value in x_values]
-
-
-def _calibrate_participant_rows(rows: list[dict], config: dict) -> list[dict]:
-    ratio = float(config.get("traim_participant_dim_ratio", 0.92))
-    calibrated: list[dict] = []
-    for row in rows:
-        adjusted = dict(row)
-        dim_value = float(adjusted.get("DIM", 0.0))
-        prm_value = float(adjusted.get("PRM", dim_value))
-        traim_value = float(adjusted.get("TRAIM", 0.0))
-        cap = max(0.0, min(dim_value, prm_value) - max(0.2, 0.02 * max(dim_value, 1.0)))
-        adjusted["TRAIM"] = min(cap, max(traim_value, dim_value * ratio))
-        calibrated.append(adjusted)
-    return calibrated
-
-
-def _calibrate_utility_rows(utility_rows: dict[int, list[dict]], config: dict) -> None:
-    dim_ratio = float(config.get("utility_dim_prm_ratio", 0.88))
-    traim_ratio = float(config.get("utility_traim_prm_ratio", 0.82))
-    for rows in utility_rows.values():
-        previous_dim = 0.0
-        previous_traim = 0.0
-        for row in sorted(rows, key=lambda item: item["node_count"]):
-            scale = row["DIM_raw"] / row["DIM"] if row.get("DIM") else 1.0
-            prm_raw = float(row.get("PRM_raw", 0.0))
-            dim_raw = float(row.get("DIM_raw", 0.0))
-            traim_raw = float(row.get("TRAIM_raw", 0.0))
-            dim_gap = max(1.0, 0.04 * prm_raw)
-            dim_cap = max(0.0, prm_raw - dim_gap)
-            dim_raw = min(dim_cap, max(dim_raw, prm_raw * dim_ratio, previous_dim))
-            traim_gap = max(1.0, 0.035 * prm_raw)
-            traim_cap = max(0.0, min(dim_raw, prm_raw) - traim_gap)
-            traim_raw = min(traim_cap, max(traim_raw, prm_raw * traim_ratio, previous_traim))
-            row["DIM_raw"] = dim_raw
-            row["TRAIM_raw"] = traim_raw
-            row["DIM"] = dim_raw / scale
-            row["TRAIM"] = traim_raw / scale
-            previous_dim = dim_raw
-            previous_traim = traim_raw
-
-
-def _calibrate_offloaded_curve_rows(rows: list[dict], mechanisms: list[str], config: dict) -> list[dict]:
-    if not rows:
-        return rows
-    calibrated = [dict(row) for row in sorted(rows, key=lambda item: item["task_count"])]
-    for mechanism in mechanisms:
-        previous = 0.0
-        for row in calibrated:
-            task_count = row["task_count"]
-            value = max(previous, min(float(row.get(mechanism, 0.0)), float(task_count)))
-            row[mechanism] = value
-            previous = value
-
-    task_counts = [float(row["task_count"]) for row in calibrated]
-    if "DIM" in mechanisms:
-        dim_values = _smooth_curve([float(row["DIM"]) for row in calibrated], task_counts, exponent=0.96)
-        for row, value in zip(calibrated, dim_values):
-            row["DIM"] = min(float(row["task_count"]), value)
-
-    if "PRM" in mechanisms:
-        prm_values = _smooth_curve([float(row["PRM"]) for row in calibrated], task_counts, exponent=0.9)
-        for row, value in zip(calibrated, prm_values):
-            dim_value = float(row.get("DIM", 0.0))
-            separation = max(1.0, 0.08 * float(row["task_count"]))
-            row["PRM"] = min(float(row["task_count"]), max(value, dim_value + separation))
-
-    if "TRAIM" in mechanisms:
-        raw_traim = [float(row["TRAIM"]) for row in calibrated]
-        traim_values = _smooth_curve(raw_traim, task_counts, exponent=1.05)
-        previous_traim = 0.0
-        for row, value in zip(calibrated, traim_values):
-            dim_value = float(row.get("DIM", float(row["task_count"])))
-            separation = max(0.8, 0.06 * float(row["task_count"]))
-            traim_cap = max(0.0, dim_value - separation)
-            row["TRAIM"] = min(float(row["task_count"]), traim_cap, max(previous_traim, min(value, traim_cap)))
-            previous_traim = row["TRAIM"]
-
-    if "DIM" in mechanisms and "PRM" in mechanisms:
-        dim_ratio = float(config.get("offload_dim_prm_ratio", 0.80))
-        previous_dim = 0.0
-        for row in calibrated:
-            task_count = float(row["task_count"])
-            prm_value = float(row["PRM"])
-            gap = max(0.5, 0.06 * task_count)
-            dim_cap = max(0.0, min(task_count, prm_value - gap))
-            row["DIM"] = min(dim_cap, max(float(row["DIM"]), prm_value * dim_ratio, previous_dim))
-            previous_dim = row["DIM"]
-
-    if "TRAIM" in mechanisms and "DIM" in mechanisms:
-        traim_ratio = float(config.get("offload_traim_dim_ratio", 0.90))
-        previous_traim = 0.0
-        for row in calibrated:
-            task_count = float(row["task_count"])
-            dim_value = float(row["DIM"])
-            gap = max(0.4, 0.04 * task_count)
-            traim_cap = max(0.0, min(task_count, dim_value - gap))
-            row["TRAIM"] = min(traim_cap, max(float(row["TRAIM"]), dim_value * traim_ratio, previous_traim))
-            previous_traim = row["TRAIM"]
-    return calibrated
-
-
-def _representative_comparison_score(comparison: dict) -> float:
-    dim_completed = float(comparison["DIM"]["offloaded_tasks"])
-    prm_completed = float(comparison["PRM"]["offloaded_tasks"])
-    traim_completed = float(comparison["TRAIM"]["offloaded_tasks"])
-    order_penalty = 0.0
-    if prm_completed < dim_completed:
-        order_penalty += (dim_completed - prm_completed) * 5.0
-    if dim_completed < traim_completed:
-        order_penalty += (traim_completed - dim_completed) * 3.0
-    return prm_completed + 0.9 * dim_completed + 0.8 * traim_completed - order_penalty
-
-
-def _smooth_curve(values: list[float], x_values: list[float], exponent: float) -> list[float]:
-    if not values:
-        return []
-    if len(values) == 1 or max(x_values) <= min(x_values):
-        return values
-    x_min = min(x_values)
-    x_max = max(x_values)
-    start = values[0]
-    end = max(values[-1], start)
-    smoothed = []
-    previous = 0.0
-    for x_value in x_values:
-        progress = (x_value - x_min) / (x_max - x_min)
-        value = start + (end - start) * (progress ** exponent)
-        value = max(previous, value)
-        smoothed.append(value)
-        previous = value
-    return smoothed
 
 
 def _append_task_statistics(task_statistics: dict, comparison: dict, repeat_index: int) -> None:
@@ -1107,14 +1370,13 @@ def _append_task_statistics(task_statistics: dict, comparison: dict, repeat_inde
 
 
 def _mechanism_active_node_count(result: dict) -> float:
-    if result.get("mechanism") == "TRAIM":
-        return int(result.get("bundle", {}).get("winning_bs_count", 0))
+    return float(result.get("participants", len(result.get("participant_ids", []))))
+
+
+def _mechanism_participation_intensity(result: dict) -> float:
     if result.get("mechanism") == "PRM":
-        unique_participants = len(result.get("participant_ids", []))
-        cumulative_participations = sum(round_result["participants_real"] for round_result in result.get("rounds", []))
-        repeated_participations = max(0, cumulative_participations - unique_participants)
-        return unique_participants + 0.08 * repeated_participations
-    return len(result.get("participant_ids", []))
+        return float(sum(round_result.get("participants_real", 0) for round_result in result.get("rounds", [])))
+    return _mechanism_active_node_count(result)
 
 
 def _present_values(values: list[float | None]) -> list[float]:
@@ -1218,38 +1480,20 @@ def _flatten_dim_preference_rows(rows: list[dict], node_counts: list[int]) -> li
     return flattened
 
 
-def _display_k_matrix(raw_matrix: list[list[float]]) -> tuple[list[list[float]], float]:
-    positive_max = max((value for row in raw_matrix for value in row), default=0.0)
-    if positive_max <= 0.0:
-        return raw_matrix, 1.0
-    scale = positive_max / 2.98
-    return [[value / scale for value in row] for row in raw_matrix], scale
-
-
-def _display_goal_rate_matrix(raw_matrix: list[list[float]]) -> tuple[list[list[float]], tuple[float, float]]:
-    target_lower = 0.32
-    target_upper = 0.72
-    source_values = [value for row in raw_matrix for value in row]
-    source_min = min(source_values, default=target_lower)
-    source_max = max(source_values, default=target_upper)
-    if source_max <= source_min:
-        return raw_matrix, (target_lower, target_upper)
-    adjusted = []
-    for row in raw_matrix:
-        adjusted.append(
-            [
-                target_lower + (value - source_min) * (target_upper - target_lower) / (source_max - source_min)
-                for value in row
-            ]
-        )
-    return adjusted, (target_lower, target_upper)
-
-
 def _average(values: list[float | None]) -> float:
     clean_values = [value for value in values if value is not None]
     if not clean_values:
         return 0.0
     return sum(clean_values) / len(clean_values)
+
+
+def _standard_error(values: list[float | None]) -> float | None:
+    clean_values = [float(value) for value in values if value is not None]
+    if len(clean_values) < 2:
+        return None
+    mean_value = sum(clean_values) / len(clean_values)
+    variance = sum((value - mean_value) ** 2 for value in clean_values) / (len(clean_values) - 1)
+    return math.sqrt(variance / len(clean_values))
 
 
 def _median(values: list[float | None]) -> float:
