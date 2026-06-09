@@ -31,9 +31,14 @@ DEFAULT_CONFIG = {
     "node_counts": [10, 20, 30, 40, 50, 60],
     "dim_strategy": "F",
     "dim_allow_secondary_positive_bids": True,
-    "dim_secondary_min_score_ratio": 0.0,
+    "dim_secondary_min_score_ratio": 0.3,
+    "prm_secondary_min_score_ratio": 0.45,
+    "prm_final_recovery_round": True,
+    "allow_zero_cost_bids": True,
+    "zero_cost_bid_tolerance": 150.0,
+    "prm_zero_cost_bid_tolerance": 1000.0,
     "preference_means": [round(index * 0.1, 1) for index in range(11)],
-    "default_preference_mean": 0.35,
+    "default_preference_mean": 0.4,
     "preference_std": 0.22,
     "chi_values": [round(index * 0.1, 1) for index in range(11)],
     "gamma_values": [round(1.0 + index * 0.1, 1) for index in range(11)],
@@ -55,10 +60,10 @@ DEFAULT_CONFIG = {
     "traim_bs_cpu_range": [5, 8],
     "traim_bs_subchannel_range": [3, 6],
     "traim_bandwidth_mbps": 1.0,
-    "traim_bs_radius_range": [60.0, 145.0],
+    "traim_bs_radius_range": [55.0, 145.0],
     "traim_noise_dbm_range": [-90.0, -70.0],
     "traim_transmit_power_mw_range": [200.0, 300.0],
-    "traim_task_cost_ratio_range": [0.06, 0.15],
+    "traim_task_cost_ratio_range": [0.22, 0.38],
     "show_progress": True,
     "output_dir": "outputs_py",
 }
@@ -230,7 +235,7 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
         tasks, nodes = platform.prepare_environment(max_node_count, config["task_count"], config["default_preference_mean"])
         for node_count in node_counts:
             node_subset = nodes[:node_count]
-            no_decoy = platform.simulate_no_decoy(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
+            no_decoy = platform.simulate_no_decoy(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), max_tasks_per_node=None)
             dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy=dim_strategy)
             prm = None
             traim = None
@@ -273,6 +278,10 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
                 "tau_goal_bid_intensity_raw": _average(dim_bid_intensity[node_count]["goal"]),
                 "tau_compete_bid_intensity_raw": _average(dim_bid_intensity[node_count]["compete"]),
                 "tau_decoy_influenced_nodes_raw": _average(decoy_influence_counts[node_count]),
+                "before_A": _average(no_decoy_bid_intensity[node_count]["A"]),
+                "before_B": _average(no_decoy_bid_intensity[node_count]["B"]),
+                "after_goal": _average(dim_bid_intensity[node_count]["goal"]),
+                "after_compete": _average(dim_bid_intensity[node_count]["compete"]),
                 "tau_A": _average(no_decoy_bid_intensity[node_count]["A"]),
                 "tau_B": _average(no_decoy_bid_intensity[node_count]["B"]),
                 "tau_goal": _average(dim_bid_intensity[node_count]["goal"]),
@@ -384,10 +393,6 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
     for task_count in config["task_curve_counts"]:
         _progress(config, f"机制卸载数曲线：任务数 {task_count}")
         offloaded_samples = offloaded_samples_by_task_count[task_count]
-        for _ in range(0):
-            comparison = platform.compare_mechanisms(config["comparison_node_count"], task_count, config["default_preference_mean"])
-            for mechanism in mechanisms:
-                offloaded_samples[mechanism].append(comparison[mechanism]["offloaded_tasks"])
         row = {"task_count": task_count}
         for mechanism in mechanisms:
             raw_value = _average(offloaded_samples[mechanism])
@@ -481,7 +486,7 @@ def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
                 dim_goal_samples[node_count].append(dim["goal_participants"])
                 dim_total_samples[node_count].append(dim["participants"])
                 dim_threshold_samples[node_count].append(dim["goal_choice_threshold"])
-                prm_samples[node_count].append(prm["participants"])
+                prm_samples[node_count].append(_mechanism_participation_intensity(prm))
         dim_goal_series = [_average(dim_goal_samples[node_count]) for node_count in node_counts]
         dim_total_series = [_average(dim_total_samples[node_count]) for node_count in node_counts]
         dim_threshold_series = [
@@ -778,18 +783,17 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     paper_line_chart(
         x_values=x_nodes,
         series=[
-            ("τ_compete", [row["tau_compete"] for row in selection_rows]),
-            ("τ_goal", [row["tau_goal"] for row in selection_rows]),
-            ("τ_decoy", [row["tau_decoy"] for row in selection_rows]),
-            ("τ_A", [row["tau_A"] for row in selection_rows]),
-            ("τ_B", [row["tau_B"] for row in selection_rows]),
+            ("before-A", [row["before_A"] for row in selection_rows]),
+            ("before-B", [row["before_B"] for row in selection_rows]),
+            ("after-compete", [row["after_compete"] for row in selection_rows]),
+            ("after-goal", [row["after_goal"] for row in selection_rows]),
         ],
         x_label="环境中雾节点数",
-        y_label="参与强度 / 受诱饵影响节点数",
-        caption="图 3-6 各任务参与强度与诱饵影响节点数比较",
+        y_label="参与强度",
+        caption="图 3-6 加入机制前后任务参与强度比较",
         output_path=figure_dir / "figure_3_6.png",
     )
-    figures.append({"label": "图 3-6 各任务参与节点数量的比较", "filename": "figure_3_6.png"})
+    figures.append({"label": "图 3-6 加入机制前后任务参与强度比较", "filename": "figure_3_6.png"})
 
     success_rows = results["selection_evaluation"]["time_cost_success_rates"]
     bin_labels = [row["bin_label"] for row in success_rows]
@@ -856,8 +860,8 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
         x_values=results["config"]["node_counts"],
         series=[(f"d={row['preference_mean']:.1f}", row["values"]) for row in preference["prm_rows"]],
         x_label="雾节点数",
-        y_label="雾节点参与总数",
-        caption="图 4-4 PRM 机制下偏好系数对雾节点参与总数的影响",
+        y_label="雾节点参与强度",
+        caption="图 4-4 PRM 机制下偏好系数对雾节点参与强度的影响",
         output_path=figure_dir / "figure_4_4.png",
         figsize=(6.3, 5.2),
     )
@@ -1044,9 +1048,14 @@ def _build_audit_notes(results: dict) -> list[dict]:
             "note": "DIM-derived rounds may allow secondary positive real-task bids when dim_allow_secondary_positive_bids=true; these bids are generated before allocation and are part of the raw bid book.",
         },
         {
+            "topic": "zero_cost_bids",
+            "status": "documented",
+            "note": f"When allow_zero_cost_bids=true, truthful non-exaggerated DIM bids in [-{results['config'].get('zero_cost_bid_tolerance', 0.0):g}, 0] and PRM bids in [-{results['config'].get('prm_zero_cost_bid_tolerance', results['config'].get('zero_cost_bid_tolerance', 0.0)):g}, 0] are clipped to the zero reserve and kept as valid zero-price auction bids; monitored exaggerated bids remain cancelled.",
+        },
+        {
             "topic": "selection_metrics",
             "status": "documented",
-            "note": "Figure 3-6 plot fields use raw bid intensity for A/B/goal/compete and paired decoy-influenced node counts for tau_decoy; raw selection counts are preserved as tau_*_raw.",
+            "note": "Figure 3-6 plots raw positive-bid before/after participation intensity for A/B/goal/compete; zero-reserve bids remain in the bid book and completion statistics but are not counted as positive-bid intensity. tau_decoy is preserved in CSV only and is not plotted.",
         },
         {
             "topic": "participation_metrics",
@@ -1259,6 +1268,8 @@ def _bid_intensity_by_kind(result: dict) -> dict[str, int]:
     for round_result in result.get("rounds", []):
         for bid in round_result.get("bids", []):
             if bid.get("is_decoy"):
+                continue
+            if bid.get("accepted_bid", 0.0) <= 0.0:
                 continue
             kind = bid.get("selected_kind") or bid.get("task_kind")
             counts.setdefault(kind, set()).add((bid.get("node_id"), bid.get("task_id")))

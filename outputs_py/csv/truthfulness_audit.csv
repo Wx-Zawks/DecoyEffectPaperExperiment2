@@ -1,4 +1,4 @@
 mechanism,target_id,truthful_utility,max_utility,best_bid_multipliers,passed_truthfulness_check,audit_note
 DIM,node_1,0.0,0.0,0.5;0.8;1.0;1.2;1.5;2.0,True,truthful bid maximizes utility in this fixed-bid scan
 PRM,node_1,0.0,0.0,0.8;1.0;1.2;1.5;2.0,True,truthful bid maximizes utility in this fixed-bid scan
-TRAIM,bs_3,0.0,85.31358550580585,2.0,False,truthful bid is not utility-maximizing in this fixed-bid scan
+TRAIM,bs_2,0.0,0.0,0.8;1.0;1.2;1.5;2.0,True,truthful bid maximizes utility in this fixed-bid scan

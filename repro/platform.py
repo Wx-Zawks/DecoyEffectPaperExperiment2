@@ -211,6 +211,20 @@ class Platform:
             if release_round > self.config["task_count"]:
                 break
 
+        if current_leftover and self.config.get("prm_final_recovery_round", True):
+            fallback_bundle = publish_pmmra_bundle(current_leftover, self.config["alpha"], self.config["beta"], self.config["lambda_loss"])
+            round_result = self._simulate_round(
+                nodes=nodes,
+                real_tasks=current_leftover,
+                bundles={"DEFAULT": fallback_bundle},
+                dynamic_update=True,
+                round_index=release_round,
+                max_tasks_per_node=None,
+            )
+            if round_result.assigned_real_tasks > 0:
+                rounds.append(round_result)
+                self._update_estimated_preferences(nodes, round_result)
+
         return self._aggregate_result("PRM", nodes, rounds, initial_bundle)
 
     def simulate_traim(self, tasks: list[Task], nodes: list[FogNode]) -> dict:
@@ -489,7 +503,8 @@ class Platform:
 
             bid_kinds = [(chosen_kind, chosen_score)]
             if self._allow_secondary_dim_bids(bundle, dynamic_update):
-                min_ratio = float(self.config.get("dim_secondary_min_score_ratio", 0.0))
+                ratio_key = "prm_secondary_min_score_ratio" if dynamic_update else "dim_secondary_min_score_ratio"
+                min_ratio = float(self.config.get(ratio_key, self.config.get("dim_secondary_min_score_ratio", 0.0)))
                 for secondary_kind, secondary_score in sorted(action_score_map.items(), key=lambda item: item[1], reverse=True):
                     if secondary_kind == chosen_kind:
                         continue
@@ -512,8 +527,16 @@ class Platform:
                     truthful_value, threshold = truthful_bid(task, node, bid_score, bid_other_scores)
                     accepted_bid, was_cancelled = monitor_bid(truthful_value, truthful_value)
                     truthful_cancellations += int(was_cancelled)
-                    if accepted_bid <= 0.0:
+                    if was_cancelled:
                         continue
+                    if accepted_bid <= 0.0:
+                        tolerance_key = "prm_zero_cost_bid_tolerance" if dynamic_update else "zero_cost_bid_tolerance"
+                        zero_tolerance = float(self.config.get(tolerance_key, self.config.get("zero_cost_bid_tolerance", 0.0)))
+                        if (
+                            not self.config.get("allow_zero_cost_bids", False)
+                            or truthful_value < -zero_tolerance
+                        ):
+                            continue
                     if not task.is_decoy:
                         participant_node_ids.add(node.node_id)
                         positive_bid_values_real.append(accepted_bid)

@@ -7,28 +7,28 @@
     },
     "computational_efficiency": {
       "claimed_complexity": "O(IJlogJ)",
-      "validation_runtime_ms": 5.4923
+      "validation_runtime_ms": 3.7244
     },
     "minimum_node_utility": 0.0
   },
   "mechanism_rows": [
     {
       "metric": "avg_participation_intensity",
-      "DIM": 34.31666666666667,
-      "PRM": 94.41111111111111,
-      "TRAIM": 25.905555555555555
+      "DIM": 34.71111111111111,
+      "PRM": 50.75,
+      "TRAIM": 25.266666666666666
     },
     {
       "metric": "avg_transaction_price_task_level",
-      "DIM": 320.71324452606524,
-      "PRM": 138.5625902535708,
-      "TRAIM": 92.83534216283446
+      "DIM": 269.66281233518214,
+      "PRM": 85.62041406150006,
+      "TRAIM": 267.0115140867275
     },
     {
       "metric": "avg_user_utility_task50",
-      "DIM": 27537.164366296664,
-      "PRM": 35887.68516356372,
-      "TRAIM": 21154.57972854046
+      "DIM": 27993.647178407435,
+      "PRM": 35990.0869938296,
+      "TRAIM": 16056.153416078208
     }
   ],
   "figure_files": [
