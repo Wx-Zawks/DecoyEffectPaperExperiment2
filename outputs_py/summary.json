@@ -7,28 +7,34 @@
     },
     "computational_efficiency": {
       "claimed_complexity": "O(IJlogJ)",
-      "validation_runtime_ms": 3.7244
+      "validation_runtime_ms": 1.7526
     },
     "minimum_node_utility": 0.0
   },
   "mechanism_rows": [
     {
       "metric": "avg_participation_intensity",
-      "DIM": 34.71111111111111,
-      "PRM": 50.75,
-      "TRAIM": 25.266666666666666
+      "DIM": 34.50555555555555,
+      "PRM": 50.661111111111104,
+      "TRAIM": 25.183333333333334,
+      "TOCA": 46.68333333333334,
+      "PC-SPE": 35.0
     },
     {
       "metric": "avg_transaction_price_task_level",
-      "DIM": 269.66281233518214,
-      "PRM": 85.62041406150006,
-      "TRAIM": 267.0115140867275
+      "DIM": 302.63860086968606,
+      "PRM": 66.48457398069672,
+      "TRAIM": 262.96737375131755,
+      "TOCA": 16.836734693877553,
+      "PC-SPE": 0.0757518079878905
     },
     {
       "metric": "avg_user_utility_task50",
-      "DIM": 27993.647178407435,
-      "PRM": 35990.0869938296,
-      "TRAIM": 16056.153416078208
+      "DIM": 28526.23365171212,
+      "PRM": 37104.62607321119,
+      "TRAIM": 16001.566489744475,
+      "TOCA": 41802.34297881,
+      "PC-SPE": 128.60334011258013
     }
   ],
   "figure_files": [

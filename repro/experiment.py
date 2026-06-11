@@ -17,6 +17,7 @@ from repro.svg import (
     write_dashboard,
 )
 from repro.traim import assign_mobile_devices, build_traim_environment, candidate_cost, run_traim
+from repro.toca import build_toca_environment, clone_base_stations_empty, run_toca
 
 
 DEFAULT_CONFIG = {
@@ -50,10 +51,30 @@ DEFAULT_CONFIG = {
     "utility_task_counts": [25, 50],
     "utility_repeats": 100,
     "utility_display_scale": 100.0,
-    "truthfulness_bid_multipliers": [0.5, 0.8, 1.0, 1.2, 1.5, 2.0],
+    "truthfulness_bid_multipliers": [0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5],
     "truthfulness_node_count": 30,
     "truthfulness_task_count": 30,
     "truthfulness_preference_mean": 0.5,
+    "enable_pcspe": True,
+    "pcspe_price_setting_ratio": 0.35,
+    "pcspe_min_price_setting_count": 1,
+    "pcspe_revenue_constant": 12.0,
+    "pcspe_workload_normalization": True,
+    "pcspe_workload_min": 0.1,
+    "pcspe_workload_max": 1.0,
+    "pcspe_crp_power_scale": 2.0,
+    "pcspe_cost_alpha0_range": [1.0, 2.0],
+    "pcspe_cost_alpha_s_range": [3.0, 4.0],
+    "pcspe_cost_alpha_t_range": [8.0, 16.0],
+    "pcspe_outer_epsilon": 0.01,
+    "pcspe_inner_epsilon": 0.000001,
+    "pcspe_max_outer_iter": 100,
+    "pcspe_max_inner_iter": 150,
+    "pcspe_price_step": 0.1,
+    "pcspe_price_upper": 50.0,
+    "pcspe_active_fraction_eps": 0.0001,
+    "pcspe_success_threshold": 0.5,
+    "pcspe_deviation_multipliers": [0.7, 0.9, 1.0, 1.1, 1.3],
     "traim_region_size": 1000.0,
     "traim_md_cpu_range": [1, 5],
     "traim_md_rate_range": [1, 10],
@@ -64,6 +85,18 @@ DEFAULT_CONFIG = {
     "traim_noise_dbm_range": [-90.0, -70.0],
     "traim_transmit_power_mw_range": [200.0, 300.0],
     "traim_task_cost_ratio_range": [0.22, 0.38],
+    "enable_toca": True,
+    "toca_time_slots": 20,
+    "toca_deadline_window": 5,
+    "toca_cpu_capacity_range": [5, 9],
+    "toca_subchannel_capacity_range": [4, 8],
+    "toca_bs_radius_range": [140, 300],
+    "toca_cpu_unit_cost": 1.0,
+    "toca_subchannel_unit_cost": 0.5,
+    "toca_price_growth_factor": 3.0,
+    "toca_value_scale": 1.0,
+    "toca_cost_scale": 1.0,
+    "toca_seed": 42,
     "show_progress": True,
     "output_dir": "outputs_py",
 }
@@ -150,6 +183,15 @@ def _progress(config: dict, message: str) -> None:
         print(f"[progress] {message}", flush=True)
 
 
+def _comparison_mechanisms(config: dict) -> list[str]:
+    mechanisms = ["DIM", "PRM", "TRAIM"]
+    if config.get("enable_toca", True):
+        mechanisms.append("TOCA")
+    if config.get("enable_pcspe", True):
+        mechanisms.append("PC-SPE")
+    return mechanisms
+
+
 def _run_dim_parameter_analysis(platform: Platform, config: dict) -> dict:
     parameter_config = dict(config)
     parameter_config["seed"] = config["seed"] + 3505
@@ -219,7 +261,7 @@ def _run_dim_parameter_analysis(platform: Platform, config: dict) -> dict:
 def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
     selection_rows: list[dict] = []
     time_cost_records: list[float] = []
-    success_records: dict[str, list[tuple[float, float]]] = {"TRAIM": [], "DIM": [], "PRM": []}
+    success_records: dict[str, list[tuple[float, float]]] = {mechanism: [] for mechanism in _comparison_mechanisms(config)}
     node_counts = config["node_counts"]
     dim_strategy = config.get("dim_strategy", "R")
     max_node_count = max(node_counts)
@@ -239,9 +281,15 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
             dim = platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset), strategy=dim_strategy)
             prm = None
             traim = None
+            toca = None
+            pcspe = None
             if node_count == config["comparison_node_count"]:
                 prm = platform.simulate_prm(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
                 traim = platform.simulate_traim(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
+                if config.get("enable_toca", True):
+                    toca = platform.simulate_toca(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
+                if config.get("enable_pcspe", True):
+                    pcspe = platform.simulate_pcspe(platform.clone_tasks(tasks), platform.clone_nodes(node_subset))
 
             no_decoy_counts[node_count]["A"].append(no_decoy["selection_counts"].get("A", 0))
             no_decoy_counts[node_count]["B"].append(no_decoy["selection_counts"].get("B", 0))
@@ -263,6 +311,10 @@ def _run_selection_evaluation(platform: Platform, config: dict) -> dict:
                 _append_success_records(success_records["DIM"], tasks, dim)
                 if prm is not None:
                     _append_success_records(success_records["PRM"], tasks, prm)
+                if toca is not None:
+                    _append_success_records(success_records["TOCA"], tasks, toca)
+                if pcspe is not None:
+                    _append_success_records(success_records["PC-SPE"], tasks, pcspe)
 
     for node_count in node_counts:
         selection_rows.append(
@@ -324,8 +376,10 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
     representative_bids: dict[str, list[float]] = {}
     representative_prices: dict[str, list[float]] = {}
     representative_task_order: list[int] = []
+    representative_toca_raw: dict[str, list[dict]] = {}
+    representative_pcspe_raw: dict[str, list[dict]] = {}
     representative_selected = False
-    mechanisms = ["DIM", "PRM", "TRAIM"]
+    mechanisms = _comparison_mechanisms(config)
     task_statistics = {
         "mechanisms": mechanisms,
         "total_tasks": config["task_count"],
@@ -352,6 +406,8 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
                     representative_bids = _task_level_metric_pair(comparison, "winning_bid")
                     representative_prices = _task_level_metric_pair(comparison, "transaction_price")
                     representative_task_order = _task_order_by_time_cost(comparison)
+                    representative_toca_raw = comparison.get("TOCA", {}).get("raw", {})
+                    representative_pcspe_raw = comparison.get("PC-SPE", {}).get("raw", {})
                 _append_task_statistics(task_statistics, comparison, repeat_index)
 
         row = {"node_count": node_count}
@@ -407,6 +463,8 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
         "task_bid_rows": representative_bids,
         "task_price_rows": representative_prices,
         "task_order_by_time_cost": representative_task_order,
+        "toca_raw": representative_toca_raw,
+        "pcspe_raw": representative_pcspe_raw,
         "task_statistics": task_statistics,
         "utility_rows": utility_rows,
     }
@@ -418,7 +476,7 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
     utility_platform = Platform(dict(config))
     node_counts = config["node_counts"]
     max_node_count = max(node_counts)
-    mechanisms = ["DIM", "PRM", "TRAIM"]
+    mechanisms = _comparison_mechanisms(config)
     for utility_task_count in config["utility_task_counts"]:
         _progress(config, f"用户效用曲线：任务数 {utility_task_count}")
         samples = {
@@ -429,12 +487,9 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
             tasks, nodes = utility_platform.prepare_environment(max_node_count, utility_task_count, config["default_preference_mean"])
             for node_count in node_counts:
                 node_subset = nodes[:node_count]
-                dim = utility_platform.simulate_dim(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset), strategy=config.get("dim_strategy", "R"))
-                prm = utility_platform.simulate_prm(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset))
-                traim = utility_platform.simulate_traim(utility_platform.clone_tasks(tasks), utility_platform.clone_nodes(node_subset))
-                samples[node_count]["DIM"].append(dim["user_total_utility"])
-                samples[node_count]["PRM"].append(prm["user_total_utility"])
-                samples[node_count]["TRAIM"].append(traim["user_total_utility"])
+                for mechanism in mechanisms:
+                    result = _simulate_mechanism(utility_platform, mechanism, tasks, node_subset)
+                    samples[node_count][mechanism].append(result["user_total_utility"])
         for node_count in node_counts:
             row = {"node_count": node_count}
             for mechanism in mechanisms:
@@ -446,7 +501,7 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
 
 
 def _compare_mechanisms_on_environment(platform: Platform, tasks: list, nodes: list, preference_mean: float) -> dict:
-    return {
+    comparison = {
         "task_count": len(tasks),
         "node_count": len(nodes),
         "preference_mean": preference_mean,
@@ -460,10 +515,26 @@ def _compare_mechanisms_on_environment(platform: Platform, tasks: list, nodes: l
             }
             for task in tasks
         ],
-        "DIM": platform.simulate_dim(platform.clone_tasks(tasks), platform.clone_nodes(nodes), strategy=platform.config.get("dim_strategy", "R")),
-        "PRM": platform.simulate_prm(platform.clone_tasks(tasks), platform.clone_nodes(nodes)),
-        "TRAIM": platform.simulate_traim(platform.clone_tasks(tasks), platform.clone_nodes(nodes)),
     }
+    for mechanism in _comparison_mechanisms(platform.config):
+        comparison[mechanism] = _simulate_mechanism(platform, mechanism, tasks, nodes)
+    return comparison
+
+
+def _simulate_mechanism(platform: Platform, mechanism: str, tasks: list, nodes: list) -> dict:
+    cloned_tasks = platform.clone_tasks(tasks)
+    cloned_nodes = platform.clone_nodes(nodes)
+    if mechanism == "DIM":
+        return platform.simulate_dim(cloned_tasks, cloned_nodes, strategy=platform.config.get("dim_strategy", "R"))
+    if mechanism == "PRM":
+        return platform.simulate_prm(cloned_tasks, cloned_nodes)
+    if mechanism == "TRAIM":
+        return platform.simulate_traim(cloned_tasks, cloned_nodes)
+    if mechanism == "TOCA":
+        return platform.simulate_toca(cloned_tasks, cloned_nodes)
+    if mechanism == "PC-SPE":
+        return platform.simulate_pcspe(cloned_tasks, cloned_nodes)
+    raise KeyError(f"Unknown comparison mechanism: {mechanism}")
 
 
 def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
@@ -513,25 +584,36 @@ def _run_truthfulness_check(config: dict) -> dict:
     node_count = int(config.get("truthfulness_node_count", config["comparison_node_count"]))
     task_count = int(config.get("truthfulness_task_count", config["task_count"]))
     preference_mean = float(config.get("truthfulness_preference_mean", config["default_preference_mean"]))
-    multipliers = [float(value) for value in config.get("truthfulness_bid_multipliers", [0.5, 0.8, 1.0, 1.2, 1.5, 2.0])]
+    multipliers = [float(value) for value in config.get("truthfulness_bid_multipliers", [0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5])]
 
     tasks, nodes = audit_platform.prepare_environment(node_count, task_count, preference_mean)
     dim = audit_platform.simulate_dim(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes), strategy=audit_config.get("dim_strategy", "R"))
     prm = audit_platform.simulate_prm(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes))
     mobile_devices, base_stations = build_traim_environment(audit_platform.clone_tasks(tasks), audit_platform.clone_nodes(nodes), audit_platform.rng, audit_config)
+    toca_tasks, toca_base_stations = build_toca_environment(
+        audit_platform.clone_tasks(tasks),
+        audit_platform.clone_nodes(nodes),
+        audit_platform.rng,
+        audit_config,
+    )
 
     rows: list[dict] = []
     rows.extend(_auction_bid_scan_rows("DIM", dim, multipliers))
     rows.extend(_auction_bid_scan_rows("PRM", prm, multipliers))
     rows.extend(_traim_bid_scan_rows(mobile_devices, base_stations, multipliers))
+    if audit_config.get("enable_toca", True):
+        rows.extend(_toca_bid_scan_rows(toca_tasks, toca_base_stations, audit_config, multipliers))
     audit_rows = _truthfulness_audit_rows(rows)
+    scan_rows = _truthfulness_scan_rows(rows, audit_rows)
     return {
-        "rows": rows,
+        "rows": scan_rows,
         "audit_rows": audit_rows,
+        "scan_audit_rows": scan_rows,
         "notes": [
             "DIM and PRM scans reuse the realized bid book and recompute winners/payments with all non-target bids fixed.",
             "PRM dynamic preference updates are not re-simulated for each report; this is an ex-post implementation audit.",
             "TRAIM scans multiply one base station's reported cost for allocation/payment while holding physical coverage and true costs fixed.",
+            "TOCA scans multiply one target SMD task's reported bid while holding all other tasks, positions, deadlines, and base-station capacities fixed.",
         ],
     }
 
@@ -735,6 +817,61 @@ def _bs_by_id(base_stations: list) -> dict:
     return {base_station.bs_id: base_station for base_station in base_stations}
 
 
+def _toca_bid_scan_rows(toca_tasks: list, base_stations: list, config: dict, multipliers: list[float]) -> list[dict]:
+    baseline = run_toca(toca_tasks, clone_base_stations_empty(base_stations), config)
+    accepted = baseline.accepted_results
+    target_task_id = accepted[0].task_id if accepted else (toca_tasks[0].task_id if toca_tasks else "")
+    task_by_id = {task.task_id: task for task in toca_tasks}
+    true_bid = task_by_id[target_task_id].bid if target_task_id in task_by_id else 0.0
+    rows: list[dict] = []
+    for multiplier in multipliers:
+        reported_bid = true_bid * multiplier
+        outcome = run_toca(
+            toca_tasks,
+            clone_base_stations_empty(base_stations),
+            config,
+            bid_overrides={target_task_id: reported_bid},
+        )
+        target_result = next((result for result in outcome.task_results if result.task_id == target_task_id), None)
+        accepted_task = bool(target_result and target_result.accepted)
+        payment = target_result.payment if target_result and accepted_task else None
+        utility = (true_bid - float(payment)) if payment is not None else 0.0
+        rows.append(
+            {
+                "mechanism": "TOCA",
+                "target_id": target_task_id,
+                "task_id": target_task_id,
+                "true_bid": true_bid,
+                "bid_multiplier": multiplier,
+                "reported_bid": reported_bid,
+                "accepted": accepted_task,
+                "won": accepted_task,
+                "won_task_count": 1 if accepted_task else 0,
+                "payment": payment,
+                "utility": utility,
+                "truthful_bid_reference": "1.0v",
+            }
+        )
+    return rows
+
+
+def _truthfulness_scan_rows(rows: list[dict], audit_rows: list[dict]) -> list[dict]:
+    status_by_mechanism = {
+        row["mechanism"]: "passed" if row["passed_truthfulness_check"] else "failed"
+        for row in audit_rows
+    }
+    scan_rows: list[dict] = []
+    for row in rows:
+        normalized = dict(row)
+        normalized.setdefault("task_id", row.get("target_id", ""))
+        normalized.setdefault("true_bid", None)
+        normalized.setdefault("reported_bid", None)
+        normalized.setdefault("accepted", row.get("won"))
+        normalized["truthfulness_status"] = status_by_mechanism.get(row["mechanism"], "unknown")
+        scan_rows.append(normalized)
+    return scan_rows
+
+
 def _truthfulness_audit_rows(rows: list[dict]) -> list[dict]:
     audit_rows: list[dict] = []
     for mechanism in sorted({row["mechanism"] for row in rows}):
@@ -797,13 +934,10 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
 
     success_rows = results["selection_evaluation"]["time_cost_success_rates"]
     bin_labels = [row["bin_label"] for row in success_rows]
+    comparison_mechanisms = _comparison_mechanisms(results["config"])
     paper_grouped_bar_chart(
         x_labels=bin_labels,
-        series=[
-            ("TRAIM", [row["TRAIM"] for row in success_rows]),
-            ("DIM", [row["DIM"] for row in success_rows]),
-            ("PRM", [row["PRM"] for row in success_rows]),
-        ],
+        series=[(mechanism, [row.get(mechanism) for row in success_rows]) for mechanism in comparison_mechanisms],
         x_label="任务时间成本区间",
         y_label="任务卸载成功率",
         caption="图 3-7 不同时间成本区间下任务卸载成功率比较",
@@ -832,17 +966,13 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     participant_rows = mechanism["participant_rows"]
     paper_line_chart(
         x_values=[row["node_count"] for row in participant_rows],
-        series=[
-            ("TRAIM", [row["TRAIM"] for row in participant_rows]),
-            ("PRM机制", [row["PRM"] for row in participant_rows]),
-            ("DIM机制", [row["DIM"] for row in participant_rows]),
-        ],
+        series=[(mechanism, [row.get(mechanism) for row in participant_rows]) for mechanism in comparison_mechanisms],
         x_label="雾节点数",
-        y_label="节点参与强度",
-        caption="图 4-2 DIM、PRM 与 TRAIM 机制下节点参与强度",
+        y_label="有效参与强度",
+        caption="图 4-2 DIM、PRM、TRAIM 与 TOCA 机制下有效参与强度",
         output_path=figure_dir / "figure_4_2.png",
     )
-    figures.append({"label": "图 4-2 DIM、PRM 与 TRAIM 节点参与强度", "filename": "figure_4_2.png"})
+    figures.append({"label": "图 4-2 DIM、PRM、TRAIM 与 TOCA 有效参与强度", "filename": "figure_4_2.png"})
 
     preference = results["preference_mean_effect"]
     paper_line_chart(
@@ -870,11 +1000,7 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     offloaded_curve = mechanism["offloaded_curve_rows"]
     paper_line_chart(
         x_values=[row["task_count"] for row in offloaded_curve],
-        series=[
-            ("TRAIM", [row["TRAIM"] for row in offloaded_curve]),
-            ("PRM机制", [row["PRM"] for row in offloaded_curve]),
-            ("DIM机制", [row["DIM"] for row in offloaded_curve]),
-        ],
+        series=[(mechanism, [row.get(mechanism) for row in offloaded_curve]) for mechanism in comparison_mechanisms],
         x_label="任务数",
         y_label="卸载成功任务数",
         caption="图 4-5 DIM、PRM 与 TRAIM 机制下卸载成功任务数比较",
@@ -911,11 +1037,7 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
         utility_scale = results["config"].get("utility_display_scale", 1.0)
         paper_line_chart(
             x_values=[row["node_count"] for row in utility_rows],
-            series=[
-                ("TRAIM", [row["TRAIM"] for row in utility_rows]),
-                ("PRM机制", [row["PRM"] for row in utility_rows]),
-                ("DIM机制", [row["DIM"] for row in utility_rows]),
-            ],
+            series=[(mechanism, [row.get(mechanism) for row in utility_rows]) for mechanism in comparison_mechanisms],
             x_label="雾节点数",
             y_label=f"移动设备总效用 / {utility_scale:g}",
             caption=f"图 4-{8 if utility_task_count == 25 else 9} 任务数为 {utility_task_count} 时 DIM、PRM 与 TRAIM 机制下用户终端设备总效用比较",
@@ -926,7 +1048,11 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     truthfulness_rows = results.get("truthfulness_check", {}).get("rows", [])
     if truthfulness_rows:
         multipliers = sorted({float(row["bid_multiplier"]) for row in truthfulness_rows})
-        mechanisms = ["DIM", "PRM", "TRAIM"]
+        mechanisms = [
+            mechanism
+            for mechanism in comparison_mechanisms
+            if any(row["mechanism"] == mechanism for row in truthfulness_rows)
+        ]
         paper_line_chart(
             x_values=multipliers,
             series=[
@@ -963,28 +1089,17 @@ def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Pa
     utility_task_count = 50 if 50 in utility_rows else sorted(utility_rows)[-1]
     utility_rows_selected = utility_rows[utility_task_count]
     price_curve = results["mechanism_comparison"]["task_price_rows"]
+    mechanisms = results["mechanism_comparison"]["task_statistics"]["mechanisms"]
+    participation_row = {"metric": "avg_participation_intensity"}
+    price_row = {"metric": "avg_transaction_price_task_level"}
+    utility_row = {"metric": f"avg_user_utility_task{utility_task_count}"}
+    for mechanism in mechanisms:
+        participation_row[mechanism] = _average([row.get(mechanism) for row in participant_rows])
+        price_row[mechanism] = _average(price_curve.get(mechanism, []))
+        utility_row[mechanism] = _average([row.get(f"{mechanism}_raw") for row in utility_rows_selected])
     return {
         "validations": results["validations"],
-        "mechanism_rows": [
-            {
-                "metric": "avg_participation_intensity",
-                "DIM": _average([row["DIM"] for row in participant_rows]),
-                "PRM": _average([row["PRM"] for row in participant_rows]),
-                "TRAIM": _average([row["TRAIM"] for row in participant_rows]),
-            },
-            {
-                "metric": "avg_transaction_price_task_level",
-                "DIM": _average(price_curve["DIM"]),
-                "PRM": _average(price_curve["PRM"]),
-                "TRAIM": _average(price_curve["TRAIM"]),
-            },
-            {
-                "metric": f"avg_user_utility_task{utility_task_count}",
-                "DIM": _average([row["DIM_raw"] for row in utility_rows_selected]),
-                "PRM": _average([row["PRM_raw"] for row in utility_rows_selected]),
-                "TRAIM": _average([row["TRAIM_raw"] for row in utility_rows_selected]),
-            },
-        ],
+        "mechanism_rows": [participation_row, price_row, utility_row],
         "figure_files": [item["filename"] for item in figure_paths],
         "explanation_file": explanation_path.name,
         "audit_file": audit_path.name,
@@ -1008,7 +1123,9 @@ def _write_experiment_csvs(csv_dir: Path, results: dict) -> None:
     _write_rows(csv_dir / "prm_preference_mean_effect.csv", _flatten_preference_rows(results["preference_mean_effect"]["prm_rows"], results["config"]["node_counts"]))
     _write_rows(csv_dir / "validations.csv", [results["validations"]])
     _write_rows(csv_dir / "truthfulness_check.csv", results["truthfulness_check"]["rows"])
-    _write_rows(csv_dir / "truthfulness_audit.csv", results["truthfulness_check"]["audit_rows"])
+    _write_rows(csv_dir / "truthfulness_audit.csv", results["truthfulness_check"].get("scan_audit_rows", results["truthfulness_check"]["rows"]))
+    _write_toca_raw_csvs(csv_dir, results)
+    _write_pcspe_raw_csvs(csv_dir, results)
 
 
 def _write_raw_experiment_csvs(csv_dir: Path, results: dict) -> None:
@@ -1023,6 +1140,29 @@ def _write_raw_experiment_csvs(csv_dir: Path, results: dict) -> None:
     for utility_task_count, rows in results["mechanism_comparison"]["utility_rows"].items():
         _write_rows(csv_dir / f"utility_task_{utility_task_count}_raw.csv", rows)
     _write_rows(csv_dir / "truthfulness_check_raw.csv", results["truthfulness_check"]["rows"])
+    _write_toca_raw_csvs(csv_dir, results)
+    _write_pcspe_raw_csvs(csv_dir, results)
+
+
+def _write_toca_raw_csvs(csv_dir: Path, results: dict) -> None:
+    toca_raw = results.get("mechanism_comparison", {}).get("toca_raw", {})
+    if not toca_raw:
+        return
+    _write_rows(csv_dir / "toca_rounds.csv", toca_raw.get("round_rows", []))
+    _write_rows(csv_dir / "toca_task_results.csv", toca_raw.get("task_result_rows", []))
+    _write_rows(csv_dir / "toca_resource_usage.csv", toca_raw.get("resource_usage_rows", []))
+    _write_rows(csv_dir / "toca_summary.csv", toca_raw.get("summary_rows", []))
+
+
+def _write_pcspe_raw_csvs(csv_dir: Path, results: dict) -> None:
+    pcspe_raw = results.get("mechanism_comparison", {}).get("pcspe_raw", {})
+    if not pcspe_raw:
+        return
+    _write_rows(csv_dir / "pcspe_allocation_rows.csv", pcspe_raw.get("allocation_rows", []))
+    _write_rows(csv_dir / "pcspe_task_results.csv", pcspe_raw.get("task_result_rows", []))
+    _write_rows(csv_dir / "pcspe_convergence.csv", pcspe_raw.get("convergence_rows", []))
+    _write_rows(csv_dir / "pcspe_summary.csv", pcspe_raw.get("summary_rows", []))
+    _write_rows(csv_dir / "pcspe_equilibrium_audit.csv", pcspe_raw.get("equilibrium_audit_rows", []))
 
 
 def _build_audit_notes(results: dict) -> list[dict]:
@@ -1060,7 +1200,37 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "participation_metrics",
             "status": "documented",
-            "note": "Figure 4-2 uses raw participation intensity; unique participant counts are preserved as *_unique_participants_raw.",
+            "note": "Figure 4-2 plots raw effective participation intensity for DIM/PRM/TRAIM/TOCA; TOCA participants are accepted SMD task requests, while DIM/PRM/TRAIM participants are resource providers or bidders.",
+        },
+        {
+            "topic": "toca_simplification",
+            "status": "documented",
+            "note": "TOCA is implemented as a comparable simplified online combinatorial-auction MEC baseline: it preserves online arrivals, candidate offloading schemes, position coverage, deadlines, resource constraints, dynamic resource prices, and accept/reject decisions.",
+        },
+        {
+            "topic": "toca_theory_scope",
+            "status": "documented",
+            "note": "The TOCA baseline simplifies the full paper mechanism by omitting the primal-dual theoretical price update proof machinery and complex VM-type enumeration; no post-simulation calibration is applied to raw TOCA data.",
+        },
+        {
+            "topic": "toca_figures",
+            "status": "documented",
+            "note": "TOCA is included in participation, task success-rate, offloaded-task, mechanism-summary, task-level heatmap, utility, and truthfulness figures; audit notes document that Figure 4-2 mixes different participant semantics.",
+        },
+        {
+            "topic": "pcspe_equilibrium_scope",
+            "status": "documented",
+            "note": "PC-SPE is modeled as a Stackelberg subgame-perfect-equilibrium price-competition mechanism, not a truthful auction, and is therefore excluded from the truthfulness bid-scan.",
+        },
+        {
+            "topic": "pcspe_metrics",
+            "status": "documented",
+            "note": "For PC-SPE, offloaded_tasks is the equivalent splittable task volume sum(1-x0), participants are unique CRPs with positive allocation fractions, and task success-rate bins use fractional task_success_credit.",
+        },
+        {
+            "topic": "pcspe_equilibrium_audit",
+            "status": "documented",
+            "note": "PC-SPE writes pcspe_equilibrium_audit.csv with convergence status, final price change, active CRP counts, CRR profit, social welfare, and a unilateral price-deviation scan for active price-setting CRPs.",
         },
         {
             "topic": "paired_task_curves",
@@ -1105,6 +1275,14 @@ def _write_audit_notes(output_dir: Path, results: dict) -> Path:
     lines.extend(["", "## Truthfulness Method Notes"])
     for note in results.get("truthfulness_check", {}).get("notes", []):
         lines.append(f"- {note}")
+    pcspe_rows = results.get("mechanism_comparison", {}).get("pcspe_raw", {}).get("equilibrium_audit_rows", [])
+    if pcspe_rows:
+        lines.extend(["", "## PC-SPE Equilibrium Audit"])
+        passed = sum(1 for row in pcspe_rows if row.get("unilateral_deviation_passed"))
+        converged = sum(1 for row in pcspe_rows if row.get("converged"))
+        lines.append(
+            f"- tasks={len(pcspe_rows)}, converged={converged}, unilateral_deviation_passed={passed}; see `csv/pcspe_equilibrium_audit.csv`."
+        )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     _write_rows(output_dir / "audit_notes.csv", results.get("audit_notes", []))
     return path
@@ -1253,6 +1431,11 @@ def _scatter_points_from_result(result: dict) -> tuple[list[float], list[float]]
 
 
 def _append_success_records(records: list[tuple[float, float]], tasks: list, result: dict) -> None:
+    task_success_credit = result.get("task_success_credit", {})
+    if task_success_credit:
+        for task in tasks:
+            records.append((task.time_cost, float(task_success_credit.get(task.task_id, 0.0))))
+        return
     assigned_task_ids = {
         assignment["task_id"]
         for round_result in result["rounds"]
@@ -1403,10 +1586,11 @@ def _task_order_by_time_cost(comparison: dict) -> list[int]:
 
 def _task_level_metric_pair(comparison: dict, metric_name: str) -> dict[str, list[float | None]]:
     output: dict[str, list[float | None]] = {}
-    for mechanism_name in ("DIM", "PRM", "TRAIM"):
-        if mechanism_name not in comparison:
+    for mechanism_name, result in comparison.items():
+        if mechanism_name in {"task_count", "node_count", "preference_mean", "tasks"}:
             continue
-        result = comparison[mechanism_name]
+        if not isinstance(result, dict) or "rounds" not in result:
+            continue
         max_task_index = comparison["task_count"]
         values: list[float | None] = [None for _ in range(max_task_index)]
         if metric_name == "time_cost":
@@ -1527,7 +1711,12 @@ def _clear_output_dir(path: Path, patterns: list[str]) -> None:
 def _write_rows(path: Path, rows: list[dict]) -> None:
     if not rows:
         return
+    fieldnames: list[str] = []
+    for row in rows:
+        for key in row.keys():
+            if key not in fieldnames:
+                fieldnames.append(key)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)

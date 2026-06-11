@@ -158,6 +158,7 @@ class RoundResult:
     preference_updates: dict[str, float]
     group_counts: dict[str, int]
     truthful_cancellations: int
+    social_welfare: float = 0.0
 
 
 def mean(values: list[float]) -> float:

@@ -371,12 +371,21 @@ def paper_grouped_bar_chart(
     ax.grid(True, axis="y")
     positions = np.arange(len(x_labels))
     width = 0.8 / max(1, len(series))
+    has_missing = False
     for index, (label, values) in enumerate(series):
         offset = (index - (len(series) - 1) / 2.0) * width
-        plot_values = [np.nan if value is None else value for value in values]
+        bar_positions = []
+        bar_values = []
+        missing_positions = []
+        for position, value in zip(positions, values):
+            if value is None or not np.isfinite(value):
+                missing_positions.append(position + offset)
+                continue
+            bar_positions.append(position + offset)
+            bar_values.append(value)
         ax.bar(
-            positions + offset,
-            plot_values,
+            bar_positions,
+            bar_values,
             width=width,
             label=label,
             color=SERIES_COLORS[index % len(SERIES_COLORS)],
@@ -384,6 +393,20 @@ def paper_grouped_bar_chart(
             linewidth=0.7,
             alpha=0.72,
         )
+        if missing_positions:
+            has_missing = True
+            ax.scatter(
+                missing_positions,
+                [0.0 for _ in missing_positions],
+                marker="x",
+                s=22,
+                color="#6C757D",
+                linewidths=0.9,
+                zorder=4,
+                label="_nolegend_",
+            )
+    if has_missing:
+        ax.scatter([], [], marker="x", s=22, color="#6C757D", linewidths=0.9, label="missing")
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_xticks(positions, x_labels, rotation=0)

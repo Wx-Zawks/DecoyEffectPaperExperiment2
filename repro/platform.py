@@ -4,7 +4,7 @@ import math
 import time
 from collections import Counter, defaultdict
 
-from repro.dim import publish_dim_bundle
+from repro.dim import classify_tasks, publish_dim_bundle
 from repro.formulas import (
     attractiveness,
     delta_increment,
@@ -19,9 +19,24 @@ from repro.formulas import (
 )
 from repro.models import Assignment, BidRecord, FogNode, PublishedBundle, RoundResult, Task, mean
 from repro.pmmra import publish_pmmra_bundle
+from repro.pcspe import (
+    build_pcspe_environment,
+    pcspe_allocation_rows,
+    pcspe_summary,
+    pcspe_task_result_rows,
+    run_pcspe,
+)
 from repro.prm import build_group_push_bundles, classify_group
 from repro.random_utils import build_rng
 from repro.traim import build_traim_environment, candidate_cost, normalized_resource_for_md, run_traim
+from repro.toca import (
+    build_toca_environment,
+    resource_usage_rows,
+    run_toca,
+    round_rows,
+    task_result_rows,
+    toca_summary,
+)
 
 
 class Platform:
@@ -85,7 +100,9 @@ class Platform:
         dim = self.simulate_dim(self.clone_tasks(tasks), self.clone_nodes(nodes), strategy=self.config.get("dim_strategy", "R"))
         prm = self.simulate_prm(self.clone_tasks(tasks), self.clone_nodes(nodes))
         traim = self.simulate_traim(self.clone_tasks(tasks), self.clone_nodes(nodes))
-        return {
+        toca = self.simulate_toca(self.clone_tasks(tasks), self.clone_nodes(nodes)) if self.config.get("enable_toca", True) else None
+        pcspe = self.simulate_pcspe(self.clone_tasks(tasks), self.clone_nodes(nodes)) if self.config.get("enable_pcspe", True) else None
+        comparison = {
             "task_count": task_count,
             "node_count": node_count,
             "preference_mean": preference_mean,
@@ -103,6 +120,11 @@ class Platform:
             "PRM": prm,
             "TRAIM": traim,
         }
+        if toca is not None:
+            comparison["TOCA"] = toca
+        if pcspe is not None:
+            comparison["PC-SPE"] = pcspe
+        return comparison
 
     def simulate_no_decoy(self, tasks: list[Task], nodes: list[FogNode], max_tasks_per_node: int | None = 2) -> dict:
         self._reset_nodes(nodes)
@@ -297,6 +319,15 @@ class Platform:
                 user_total_utility += device.local_value - payment_share
 
         served_task_ids = {assignment.task_id for assignment in assignments}
+        social_cost = sum(candidate_cost(bs_by_id[bs_id], outcome.candidates[bs_id], md_by_id) for bs_id in outcome.winners)
+        traim_social_welfare = (
+            sum(
+                md_by_id[md_id].local_value
+                for bs_id in outcome.winners
+                for md_id in outcome.candidates[bs_id].md_ids
+            )
+            - social_cost
+        )
         round_result = RoundResult(
             round_index=0,
             bundle_labels={"DEFAULT": "TRAIM"},
@@ -317,8 +348,8 @@ class Platform:
             preference_updates={node.node_id: node.preference for node in nodes},
             group_counts={"BS": len(nodes)},
             truthful_cancellations=0,
+            social_welfare=traim_social_welfare,
         )
-        social_cost = sum(candidate_cost(bs_by_id[bs_id], outcome.candidates[bs_id], md_by_id) for bs_id in outcome.winners)
         total_payment = sum(outcome.payments.values())
         return {
             "mechanism": "TRAIM",
@@ -329,6 +360,7 @@ class Platform:
             "average_bid": mean(bid_values),
             "average_transaction_price": mean(payment_values),
             "user_total_utility": user_total_utility,
+            "social_welfare": traim_social_welfare,
             "goal_selection_rate": 0.0,
             "goal_choice_threshold": None,
             "selection_counts": {"BS": len(outcome.bidder_ids), "WINNER": len(outcome.winners)},
@@ -344,6 +376,7 @@ class Platform:
                 "positive_reward_lower": 0.0,
                 "positive_time_lower": 0.0,
                 "social_cost": round(social_cost, 6),
+                "social_welfare": round(traim_social_welfare, 6),
                 "total_payment": round(total_payment, 6),
                 "overpayment_ratio": round((total_payment - social_cost) / social_cost, 6) if social_cost > 0.0 else 0.0,
                 "winning_bs_count": len(outcome.winners),
@@ -353,6 +386,282 @@ class Platform:
             "node_utilities": {node.node_id: round(node.utility, 6) for node in nodes},
             "individual_rationality": min((node.utility for node in nodes), default=0.0) >= -1e-9,
             "truthful_cancellations": 0,
+        }
+
+    def simulate_toca(self, tasks: list[Task], nodes: list[FogNode]) -> dict:
+        self._reset_nodes(nodes)
+        toca_seed = int(self.config.get("toca_seed", self.config.get("seed", 0))) + self.rng.randint(0, 1_000_000)
+        toca_rng = build_rng(toca_seed)
+        toca_tasks, base_stations = build_toca_environment(tasks, nodes, toca_rng, self.config)
+        outcome = run_toca(toca_tasks, base_stations, self.config)
+        summary = toca_summary(outcome)
+        task_by_id = {task.task_id: task for task in toca_tasks}
+        bs_by_id = {base_station.bs_id: base_station for base_station in base_stations}
+
+        assignments: list[Assignment] = []
+        bid_records: list[BidRecord] = []
+        offloaded_time_costs: list[float] = []
+        bid_values: list[float] = []
+        payment_values: list[float] = []
+        accepted_task_ids: list[str] = []
+        task_utilities: dict[str, float] = {}
+
+        for result in outcome.accepted_results:
+            task = task_by_id[result.task_id]
+            selected_bs = result.selected_bs or ""
+            node_id = bs_by_id[selected_bs].node_id if selected_bs in bs_by_id else selected_bs
+            accepted_task_ids.append(result.task_id)
+            task_utilities[result.task_id] = round(result.smd_utility, 6)
+            assignments.append(
+                Assignment(
+                    task_id=result.task_id,
+                    winner_node_id=selected_bs,
+                    winning_bid=task.bid,
+                    transaction_price=result.payment,
+                    is_decoy=False,
+                )
+            )
+            bid_records.append(
+                BidRecord(
+                    node_id=node_id,
+                    task_id=result.task_id,
+                    task_kind=task.task_class,
+                    selected_kind="TOCA",
+                    task_time_cost=task.time_cost,
+                    task_reward=task.reward,
+                    reported_bid=task.bid,
+                    truthful_bid=task.value,
+                    accepted_bid=task.bid,
+                    execution_cost=result.operational_cost,
+                    satisfaction_threshold=0.0,
+                    selected_score=result.smd_utility,
+                    competitor_kind=None,
+                    competitor_score=0.0,
+                    truthful=True,
+                    is_decoy=False,
+                )
+            )
+            offloaded_time_costs.append(task.time_cost)
+            bid_values.append(task.bid)
+            payment_values.append(result.payment)
+
+        rejected_count = len(outcome.rejected_results)
+        round_result = RoundResult(
+            round_index=0,
+            bundle_labels={"DEFAULT": "TOCA"},
+            selection_counts={"ACCEPTED": len(outcome.accepted_results), "REJECTED": rejected_count},
+            display_selection_counts={"ACCEPTED": len(outcome.accepted_results), "REJECTED": rejected_count},
+            participants_real=len(outcome.accepted_results),
+            participant_node_ids=accepted_task_ids,
+            assigned_real_tasks=len(outcome.accepted_results),
+            offloaded_time_costs=offloaded_time_costs,
+            positive_bid_count_real=len(bid_values),
+            average_bid_real=mean(bid_values),
+            average_transaction_price_real=mean(payment_values),
+            user_total_utility=summary["user_total_utility"],
+            assignments=assignments,
+            bids=bid_records,
+            leftover_task_ids=[result.task_id for result in outcome.rejected_results],
+            estimated_preferences={},
+            preference_updates={},
+            group_counts={"SMD": len(toca_tasks), "BS": len(base_stations)},
+            truthful_cancellations=0,
+            social_welfare=summary["social_welfare"],
+        )
+        total_goal_count = max(1, summary["total_goal_task_count"])
+        return {
+            "mechanism": "TOCA",
+            "participants": len(outcome.accepted_results),
+            "goal_participants": summary["accepted_goal_task_count"],
+            "participant_ids": accepted_task_ids,
+            "offloaded_tasks": len(outcome.accepted_results),
+            "average_bid": mean(bid_values),
+            "average_transaction_price": mean(payment_values),
+            "user_total_utility": summary["user_total_utility"],
+            "social_welfare": summary["social_welfare"],
+            "goal_selection_rate": summary["accepted_goal_task_count"] / total_goal_count,
+            "goal_choice_threshold": None,
+            "selection_counts": {"ACCEPTED": len(outcome.accepted_results), "REJECTED": rejected_count},
+            "offloaded_time_costs": offloaded_time_costs,
+            "rounds": [self._serialize_round(round_result)],
+            "bundle": {
+                "strategy": "TOCA",
+                "accepted_task_count": len(outcome.accepted_results),
+                "rejected_task_count": rejected_count,
+                "accepted_goal_task_count": summary["accepted_goal_task_count"],
+                "total_payment": summary["total_payment"],
+                "total_operational_cost": summary["total_operational_cost"],
+                "resource_utilization": summary["resource_utilization"],
+                "social_welfare": summary["social_welfare"],
+            },
+            "node_utilities": {},
+            "task_utilities": task_utilities,
+            "individual_rationality": summary["individual_rationality"],
+            "truthful_cancellations": 0,
+            "raw": {
+                "round_rows": round_rows(outcome),
+                "task_result_rows": task_result_rows(outcome),
+                "resource_usage_rows": resource_usage_rows(outcome),
+                "summary_rows": [
+                    {
+                        "mechanism": "TOCA",
+                        **summary,
+                    }
+                ],
+            },
+        }
+
+    def simulate_pcspe(self, tasks: list[Task], nodes: list[FogNode]) -> dict:
+        self._reset_nodes(nodes)
+        crps = build_pcspe_environment(tasks, nodes, self.rng, self.config)
+        outcome = run_pcspe(tasks, crps, self.config)
+        task_by_id = {task.task_id: task for task in tasks}
+        node_by_id = {node.node_id: node for node in nodes}
+        active_eps = float(self.config.get("pcspe_active_fraction_eps", 0.0001))
+        success_threshold = float(self.config.get("pcspe_success_threshold", 0.5))
+
+        assignments: list[Assignment] = []
+        bid_records: list[BidRecord] = []
+        participant_ids: set[str] = set()
+        task_success_credit: dict[str, float] = {}
+        task_level_costs: list[float] = []
+        task_level_payments: list[float] = []
+        offloaded_time_costs: list[float] = []
+        active_price_setting_prices: list[float] = []
+        active_prices: list[float] = []
+
+        for task_outcome in outcome.task_outcomes:
+            task = task_by_id[task_outcome.task_id]
+            task_success_credit[task.task_id] = task_outcome.offload_fraction
+            if task_outcome.offload_fraction > active_eps:
+                offloaded_time_costs.append(task.time_cost)
+            task_level_costs.append(task_outcome.total_crp_cost)
+            task_level_payments.append(task_outcome.total_payment)
+            assignments.append(
+                Assignment(
+                    task_id=task.task_id,
+                    winner_node_id="mixed_crps",
+                    winning_bid=task_outcome.total_crp_cost,
+                    transaction_price=task_outcome.total_payment,
+                    is_decoy=False,
+                )
+            )
+            for allocation in task_outcome.allocations:
+                participant_ids.add(allocation.node_id)
+                active_prices.append(allocation.price)
+                if allocation.crp_type == "price_setting":
+                    active_price_setting_prices.append(allocation.price)
+                if allocation.node_id in node_by_id:
+                    node_by_id[allocation.node_id].utility += allocation.crp_profit
+                bid_records.append(
+                    BidRecord(
+                        node_id=allocation.node_id,
+                        task_id=task.task_id,
+                        task_kind=task.kind,
+                        selected_kind="PC-SPE",
+                        task_time_cost=task.time_cost,
+                        task_reward=task.reward,
+                        reported_bid=allocation.price,
+                        truthful_bid=allocation.cost,
+                        accepted_bid=allocation.payment,
+                        execution_cost=allocation.cost,
+                        satisfaction_threshold=0.0,
+                        selected_score=allocation.fraction,
+                        competitor_kind=None,
+                        competitor_score=0.0,
+                        truthful=True,
+                        is_decoy=False,
+                    )
+                )
+
+        goal_task_ids: set[str] = set()
+        try:
+            categories, _, _ = classify_tasks([task.clone() for task in tasks])
+            goal_task_ids = {task.task_id for task in categories.get("A", [])}
+        except ValueError:
+            goal_task_ids = set()
+        goal_credit = sum(task_success_credit.get(task_id, 0.0) for task_id in goal_task_ids)
+        goal_selection_rate = goal_credit / len(goal_task_ids) if goal_task_ids else 0.0
+
+        active_price_source = active_price_setting_prices if active_price_setting_prices else active_prices
+        total_crr_profit = sum(task.crr_profit for task in outcome.task_outcomes)
+        total_social_welfare = sum(task.social_welfare for task in outcome.task_outcomes)
+        threshold_success_count = sum(1 for task in outcome.task_outcomes if task.offload_fraction >= success_threshold)
+        convergence_rows = outcome.convergence_rows
+        round_result = RoundResult(
+            round_index=0,
+            bundle_labels={"DEFAULT": "PC-SPE"},
+            selection_counts={
+                "PRICE_SETTING_ACTIVE": sum(task.active_price_setting_count for task in outcome.task_outcomes),
+                "PRICE_TAKING_ACTIVE": sum(task.active_price_taking_count for task in outcome.task_outcomes),
+                "THRESHOLD_SUCCESS": threshold_success_count,
+            },
+            display_selection_counts={
+                "PRICE_SETTING_ACTIVE": sum(task.active_price_setting_count for task in outcome.task_outcomes),
+                "PRICE_TAKING_ACTIVE": sum(task.active_price_taking_count for task in outcome.task_outcomes),
+                "THRESHOLD_SUCCESS": threshold_success_count,
+            },
+            participants_real=len(participant_ids),
+            participant_node_ids=sorted(participant_ids),
+            assigned_real_tasks=sum(1 for task in outcome.task_outcomes if task.offload_fraction > active_eps),
+            offloaded_time_costs=offloaded_time_costs,
+            positive_bid_count_real=len(bid_records),
+            average_bid_real=mean(active_price_source),
+            average_transaction_price_real=mean(task_level_payments),
+            user_total_utility=total_crr_profit,
+            assignments=assignments,
+            bids=bid_records,
+            leftover_task_ids=[task.task_id for task in outcome.task_outcomes if task.offload_fraction <= active_eps],
+            estimated_preferences={node.node_id: node.preference for node in nodes},
+            preference_updates={node.node_id: node.preference for node in nodes},
+            group_counts={
+                "PRICE_SETTING": sum(1 for crp in crps if crp.crp_type == "price_setting"),
+                "PRICE_TAKING": sum(1 for crp in crps if crp.crp_type == "price_taking"),
+            },
+            truthful_cancellations=0,
+            social_welfare=total_social_welfare,
+        )
+        return {
+            "mechanism": "PC-SPE",
+            "participants": len(participant_ids),
+            "goal_participants": goal_credit,
+            "participant_ids": sorted(participant_ids),
+            "offloaded_tasks": sum(task.offload_fraction for task in outcome.task_outcomes),
+            "average_bid": mean(active_price_source),
+            "average_transaction_price": mean(task_level_payments),
+            "user_total_utility": total_crr_profit,
+            "social_welfare": total_social_welfare,
+            "goal_selection_rate": goal_selection_rate,
+            "goal_choice_threshold": None,
+            "selection_counts": dict(round_result.selection_counts),
+            "offloaded_time_costs": offloaded_time_costs,
+            "rounds": [self._serialize_round(round_result)],
+            "bundle": {
+                "strategy": "PC-SPE",
+                "equilibrium_type": "Stackelberg subgame perfect equilibrium",
+                "truthfulness_scope": "not_truthful_auction",
+                "offloaded_tasks_semantics": "sum(1 - x0_j), equivalent offloaded task volume",
+                "participants_semantics": "unique CRPs with positive allocation fraction",
+                "threshold_success_count": threshold_success_count,
+                "success_threshold": success_threshold,
+                "total_payment": round(sum(task.total_payment for task in outcome.task_outcomes), 6),
+                "total_crp_cost": round(sum(task.total_crp_cost for task in outcome.task_outcomes), 6),
+                "social_welfare": round(total_social_welfare, 6),
+                "converged_task_count": sum(1 for task in outcome.task_outcomes if task.converged),
+                "deviation_passed_task_count": sum(1 for task in outcome.task_outcomes if task.unilateral_deviation_passed),
+                "task_success_credit": task_success_credit,
+            },
+            "node_utilities": {node.node_id: round(node.utility, 6) for node in nodes},
+            "individual_rationality": min((allocation["crp_profit"] for allocation in outcome.allocation_rows), default=0.0) >= -1e-9,
+            "truthful_cancellations": 0,
+            "task_success_credit": task_success_credit,
+            "raw": {
+                "allocation_rows": pcspe_allocation_rows(outcome),
+                "task_result_rows": pcspe_task_result_rows(outcome),
+                "convergence_rows": convergence_rows,
+                "summary_rows": pcspe_summary(outcome),
+                "equilibrium_audit_rows": convergence_rows,
+            },
         }
 
     def validate_properties(self) -> dict:
@@ -585,6 +894,7 @@ class Platform:
         transaction_values_real: list[float] = []
         offloaded_time_costs: list[float] = []
         user_total_utility = 0.0
+        social_welfare = 0.0
 
         for task_id, bids in bid_book.items():
             ordered_bids = sorted(bids, key=lambda item: item.accepted_bid)
@@ -610,6 +920,7 @@ class Platform:
                 transaction_values_real.append(second_price)
                 offloaded_time_costs.append(task.time_cost)
                 user_total_utility += local_execution_cost(task) - second_price
+                social_welfare += local_execution_cost(task) - winner.execution_cost
 
         bonus_nodes = self._bonus_nodes(bid_book, assignments)
         bonus_value = 0.0
@@ -644,6 +955,7 @@ class Platform:
             preference_updates=preference_updates,
             group_counts=dict(group_counts),
             truthful_cancellations=truthful_cancellations,
+            social_welfare=social_welfare,
         )
 
     def _aggregate_result(self, mechanism: str, nodes: list[FogNode], rounds: list[RoundResult], base_bundle: PublishedBundle) -> dict:
@@ -675,6 +987,7 @@ class Platform:
             "average_bid": average_bid,
             "average_transaction_price": average_price,
             "user_total_utility": sum(round_result.user_total_utility for round_result in rounds),
+            "social_welfare": sum(round_result.social_welfare for round_result in rounds),
             "goal_selection_rate": rounds[0].selection_counts.get("A", 0) / len(nodes) if nodes else 0.0,
             "goal_choice_threshold": goal_threshold,
             "selection_counts": aggregate_selection_counts,
@@ -689,6 +1002,7 @@ class Platform:
                 "time_factor_range": base_bundle.time_factor_range,
                 "positive_reward_lower": base_bundle.positive_reward_lower,
                 "positive_time_lower": base_bundle.positive_time_lower,
+                "social_welfare": round(sum(round_result.social_welfare for round_result in rounds), 6),
             },
             "node_utilities": {node.node_id: round(node.utility, 6) for node in nodes},
             "individual_rationality": min((node.utility for node in nodes), default=0.0) >= -1e-9,
@@ -722,6 +1036,7 @@ class Platform:
             "average_bid_real": round(round_result.average_bid_real, 6),
             "average_transaction_price_real": round(round_result.average_transaction_price_real, 6),
             "user_total_utility": round(round_result.user_total_utility, 6),
+            "social_welfare": round(round_result.social_welfare, 6),
             "assignments": [assignment.__dict__ for assignment in round_result.assignments],
             "bids": [bid.__dict__ for bid in round_result.bids],
             "leftover_task_ids": round_result.leftover_task_ids,
