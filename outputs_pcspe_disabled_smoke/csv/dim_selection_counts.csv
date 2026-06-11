@@ -1,0 +1,2 @@
+node_count,tau_A_raw,tau_B_raw,tau_goal_raw,tau_compete_raw,tau_decoy_raw,tau_A_bid_intensity_raw,tau_B_bid_intensity_raw,tau_goal_bid_intensity_raw,tau_compete_bid_intensity_raw,tau_decoy_influenced_nodes_raw,before_A,before_B,after_goal,after_compete,tau_A,tau_B,tau_goal,tau_compete,tau_decoy
+10,0.0,3.0,6.0,3.0,0.0,0.0,3.0,18.0,3.0,6.0,0.0,3.0,18.0,3.0,0.0,3.0,18.0,3.0,6.0

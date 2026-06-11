@@ -1,0 +1,5 @@
+mechanism,total_tasks,mean_completed_tasks,mean_completion_rate,winning_bid_sample_count,winning_bid_mean,winning_bid_median,transaction_price_sample_count,transaction_price_mean,transaction_price_median
+DIM,10,9.0,0.9,9,318.9796036036379,0.0,9,437.1945421242915,105.21545276542622
+PRM,10,10.0,1.0,10,174.17266695031225,0.0,10,199.7036963540292,0.0
+TRAIM,10,2.0,0.2,2,397.69216378317776,397.69216378317776,2,397.69216378317776,397.69216378317776
+TOCA,10,6.0,0.6,6,675.1824240538776,634.6011190937447,6,10.5,7.0

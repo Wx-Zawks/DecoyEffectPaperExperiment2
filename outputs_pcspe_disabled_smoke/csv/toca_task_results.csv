@@ -1,0 +1,11 @@
+task_id,arrival_time,deadline,task_class,bid,accepted,selected_bs,selected_time_slots,payment,operational_cost,dynamic_price,smd_utility,social_welfare_contribution,cpu_demand,subchannel_demand,candidate_count,rejection_reason
+task_1,0,5,A,1368.422838,False,,,0.0,0.0,0.0,0.0,0.0,5,3,0,no_feasible_scheme
+task_2,2,7,C,616.169187,True,bs_9,2,7.0,3.5,3.5,609.169187,612.669187,2,3,4,
+task_3,3,8,C,1415.547955,False,,,0.0,0.0,0.0,0.0,0.0,5,1,0,no_feasible_scheme
+task_4,5,10,B,357.59141,False,,,0.0,0.0,0.0,0.0,0.0,1,2,0,no_feasible_scheme
+task_5,6,11,C,1567.42182,False,,,0.0,0.0,0.0,0.0,0.0,4,1,0,no_feasible_scheme
+task_6,8,13,C,653.033051,True,bs_9,8,7.0,3.5,3.5,646.033051,649.533051,2,3,1,
+task_7,9,14,A,1167.522253,True,bs_10,9;10,22.0,11.0,11.0,1145.522253,1156.522253,4,3,1,
+task_8,11,16,B,791.326631,True,bs_2,11;12,16.0,8.0,8.0,775.326631,783.326631,3,2,1,
+task_9,12,17,C,511.026662,True,bs_8,12,7.0,3.5,3.5,504.026662,507.526662,2,3,5,
+task_10,14,19,C,312.01676,True,bs_8,14,4.0,2.0,2.0,308.01676,310.01676,1,2,2,

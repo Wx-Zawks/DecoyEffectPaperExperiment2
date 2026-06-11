@@ -1,0 +1,7 @@
+task_id,arrival_time,deadline,task_class,bid,accepted,selected_bs,selected_time_slots,payment,operational_cost,dynamic_price,smd_utility,social_welfare_contribution,cpu_demand,subchannel_demand,candidate_count,rejection_reason
+task_1,0,5,B,260.007546,True,bs_4,0,4.0,2.0,2.0,256.007546,258.007546,1,2,1,
+task_2,3,8,C,251.187566,False,,,0.0,0.0,0.0,0.0,0.0,1,3,0,no_feasible_scheme
+task_3,6,11,A,1007.301136,False,,,0.0,0.0,0.0,0.0,0.0,3,3,0,no_feasible_scheme
+task_4,8,13,B,234.666615,False,,,0.0,0.0,0.0,0.0,0.0,1,2,0,no_feasible_scheme
+task_5,11,16,C,287.910879,True,bs_4,11,4.0,2.0,2.0,283.910879,285.910879,1,2,4,
+task_6,14,19,C,1224.730787,True,bs_2,14;15;16,33.0,16.5,16.5,1191.730787,1208.230787,5,1,1,

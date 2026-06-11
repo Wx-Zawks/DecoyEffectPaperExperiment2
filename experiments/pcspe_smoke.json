@@ -1,0 +1,16 @@
+{
+  "seed": 20260328,
+  "task_count": 10,
+  "node_counts": [10, 20],
+  "task_curve_counts": [5, 10],
+  "utility_task_counts": [25, 50],
+  "repeats": 2,
+  "parameter_repeats": 2,
+  "utility_repeats": 2,
+  "parameter_node_count": 20,
+  "comparison_node_count": 10,
+  "enable_toca": true,
+  "enable_pcspe": true,
+  "show_progress": true,
+  "output_dir": "outputs_pcspe_smoke"
+}

@@ -1,0 +1,2 @@
+mechanism,task_count,allocation_count,equivalent_offloaded_tasks,threshold_success_count,total_crr_profit,total_social_welfare,total_payment,total_crp_cost,converged_task_count,deviation_passed_task_count
+PC-SPE,50,1500,45.288532,50,135.874495,136.596765,3.78759,3.06532,50,50

@@ -1,0 +1,53 @@
+{
+  "validations": {
+    "individual_rationality": true,
+    "truthfulness": {
+      "honest_bid_preserved": true,
+      "inflated_bid_cancelled": true
+    },
+    "computational_efficiency": {
+      "claimed_complexity": "O(IJlogJ)",
+      "validation_runtime_ms": 1.099
+    },
+    "minimum_node_utility": 0.0
+  },
+  "mechanism_rows": [
+    {
+      "metric": "avg_participation_intensity",
+      "DIM": 5.5,
+      "PRM": 14.0,
+      "TRAIM": 1.0,
+      "TOCA": 5.0
+    },
+    {
+      "metric": "avg_transaction_price_task_level",
+      "DIM": 828.0637882973634,
+      "PRM": 710.4270470630765,
+      "TRAIM": 291.86906227684034,
+      "TOCA": 14.75
+    },
+    {
+      "metric": "avg_user_utility_task8",
+      "DIM": 3871.973233001862,
+      "PRM": 6761.859402113832,
+      "TRAIM": 1880.586126901394,
+      "TOCA": 5562.5931325
+    }
+  ],
+  "figure_files": [
+    "figure_3_5.png",
+    "figure_3_6.png",
+    "figure_3_7.png",
+    "figure_3_8.png",
+    "figure_4_2.png",
+    "figure_4_3.png",
+    "figure_4_4.png",
+    "figure_4_5.png",
+    "figure_4_6.png",
+    "figure_4_7.png",
+    "figure_4_9.png",
+    "truthfulness_check.png"
+  ],
+  "explanation_file": "DIM_PRM_算法实现说明.md",
+  "audit_file": "audit_notes.md"
+}

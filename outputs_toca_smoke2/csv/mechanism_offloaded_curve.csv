@@ -1,0 +1,3 @@
+task_count,DIM_raw,DIM_std_error,DIM,PRM_raw,PRM_std_error,PRM,TRAIM_raw,TRAIM_std_error,TRAIM,TOCA_raw,TOCA_std_error,TOCA
+3,3.0,,3.0,3.0,,3.0,0.0,,0.0,2.0,,2.0
+6,4.0,,4.0,6.0,,6.0,0.0,,0.0,2.0,,2.0

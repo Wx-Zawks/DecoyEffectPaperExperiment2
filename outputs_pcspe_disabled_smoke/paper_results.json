@@ -1,0 +1,5917 @@
+{
+  "config": {
+    "seed": 20260328,
+    "alpha": 0.88,
+    "beta": 0.88,
+    "lambda_loss": 2.25,
+    "frequency_range": [
+      1.0,
+      1.5
+    ],
+    "reward_range": [
+      2.0,
+      20.0
+    ],
+    "time_cost_range": [
+      200.0,
+      2000.0
+    ],
+    "task_count": 10,
+    "node_counts": [
+      10
+    ],
+    "dim_strategy": "F",
+    "dim_allow_secondary_positive_bids": true,
+    "dim_secondary_min_score_ratio": 0.3,
+    "prm_secondary_min_score_ratio": 0.45,
+    "prm_final_recovery_round": true,
+    "allow_zero_cost_bids": true,
+    "zero_cost_bid_tolerance": 150.0,
+    "prm_zero_cost_bid_tolerance": 1000.0,
+    "preference_means": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "default_preference_mean": 0.4,
+    "preference_std": 0.22,
+    "chi_values": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "gamma_values": [
+      1.0,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8,
+      1.9,
+      2.0
+    ],
+    "task_curve_counts": [
+      5
+    ],
+    "repeats": 1,
+    "parameter_repeats": 1,
+    "parameter_node_count": 10,
+    "comparison_node_count": 10,
+    "utility_task_counts": [
+      25
+    ],
+    "utility_repeats": 1,
+    "utility_display_scale": 100.0,
+    "truthfulness_bid_multipliers": [
+      0.5,
+      0.7,
+      0.9,
+      1.0,
+      1.1,
+      1.3,
+      1.5
+    ],
+    "truthfulness_node_count": 30,
+    "truthfulness_task_count": 30,
+    "truthfulness_preference_mean": 0.5,
+    "enable_pcspe": false,
+    "pcspe_price_setting_ratio": 0.35,
+    "pcspe_min_price_setting_count": 1,
+    "pcspe_revenue_constant": 12.0,
+    "pcspe_workload_normalization": true,
+    "pcspe_workload_min": 0.1,
+    "pcspe_workload_max": 1.0,
+    "pcspe_crp_power_scale": 2.0,
+    "pcspe_cost_alpha0_range": [
+      1.0,
+      2.0
+    ],
+    "pcspe_cost_alpha_s_range": [
+      3.0,
+      4.0
+    ],
+    "pcspe_cost_alpha_t_range": [
+      8.0,
+      16.0
+    ],
+    "pcspe_outer_epsilon": 0.01,
+    "pcspe_inner_epsilon": 1e-06,
+    "pcspe_max_outer_iter": 100,
+    "pcspe_max_inner_iter": 150,
+    "pcspe_price_step": 0.1,
+    "pcspe_price_upper": 50.0,
+    "pcspe_active_fraction_eps": 0.0001,
+    "pcspe_success_threshold": 0.5,
+    "pcspe_deviation_multipliers": [
+      0.7,
+      0.9,
+      1.0,
+      1.1,
+      1.3
+    ],
+    "traim_region_size": 1000.0,
+    "traim_md_cpu_range": [
+      1,
+      5
+    ],
+    "traim_md_rate_range": [
+      1,
+      10
+    ],
+    "traim_bs_cpu_range": [
+      5,
+      8
+    ],
+    "traim_bs_subchannel_range": [
+      3,
+      6
+    ],
+    "traim_bandwidth_mbps": 1.0,
+    "traim_bs_radius_range": [
+      55.0,
+      145.0
+    ],
+    "traim_noise_dbm_range": [
+      -90.0,
+      -70.0
+    ],
+    "traim_transmit_power_mw_range": [
+      200.0,
+      300.0
+    ],
+    "traim_task_cost_ratio_range": [
+      0.22,
+      0.38
+    ],
+    "enable_toca": true,
+    "toca_time_slots": 20,
+    "toca_deadline_window": 5,
+    "toca_cpu_capacity_range": [
+      5,
+      9
+    ],
+    "toca_subchannel_capacity_range": [
+      4,
+      8
+    ],
+    "toca_bs_radius_range": [
+      140,
+      300
+    ],
+    "toca_cpu_unit_cost": 1.0,
+    "toca_subchannel_unit_cost": 0.5,
+    "toca_price_growth_factor": 3.0,
+    "toca_value_scale": 1.0,
+    "toca_cost_scale": 1.0,
+    "toca_seed": 42,
+    "show_progress": false,
+    "output_dir": "outputs_pcspe_disabled_smoke"
+  },
+  "dim_parameter_analysis": {
+    "x_values": [
+      0.0,
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "y_values": [
+      1.0,
+      1.1,
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8,
+      1.9,
+      2.0
+    ],
+    "k_matrix": [
+      [
+        -178.74807973224543,
+        -144.60230713074057,
+        -113.75002052345391,
+        -84.98914093355643,
+        -57.78543411767481,
+        -31.84342838471116,
+        -6.982245605019017,
+        16.91333330284644,
+        39.9151670941597,
+        62.062042124661446,
+        83.36289463226208
+      ],
+      [
+        -152.66422516013276,
+        -118.5184525586279,
+        -87.66616595134124,
+        -58.90528636144376,
+        -31.70157954556214,
+        -5.759573812598489,
+        19.101608967093654,
+        42.99718787495911,
+        65.99902166627237,
+        88.14589669677409,
+        109.4467492043747
+      ],
+      [
+        -125.06810733575091,
+        -90.92233473424605,
+        -60.07004812695939,
+        -31.309168537061908,
+        -4.105461721180291,
+        21.83654401178336,
+        46.6977267914755,
+        70.59330569934096,
+        93.59513949065422,
+        115.74201452115594,
+        137.04286702875658
+      ],
+      [
+        -95.46500553848043,
+        -61.31923293697557,
+        -30.46694632968891,
+        -1.7060667397914244,
+        25.497640076090192,
+        51.43964580905384,
+        76.30082858874599,
+        100.19640749661144,
+        123.1982412879247,
+        145.34511631842642,
+        166.6459688260271
+      ],
+      [
+        -62.757885535218236,
+        -28.612112933713377,
+        2.240173673573281,
+        31.001053263470766,
+        58.20476007935238,
+        84.14676581231603,
+        109.00794859200818,
+        132.90352749987363,
+        155.9053612911869,
+        178.05223632168858,
+        199.35308882928925
+      ],
+      [
+        -21.94175669875412,
+        12.20401590275074,
+        43.0563025100374,
+        71.81718209993491,
+        99.02088891581653,
+        124.96289464878018,
+        149.82407742847232,
+        173.7196563363378,
+        196.72149012765104,
+        218.86836515815273,
+        240.1692176657534
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "raw_k_matrix": [
+      [
+        -178.74807973224543,
+        -144.60230713074057,
+        -113.75002052345391,
+        -84.98914093355643,
+        -57.78543411767481,
+        -31.84342838471116,
+        -6.982245605019017,
+        16.91333330284644,
+        39.9151670941597,
+        62.062042124661446,
+        83.36289463226208
+      ],
+      [
+        -152.66422516013276,
+        -118.5184525586279,
+        -87.66616595134124,
+        -58.90528636144376,
+        -31.70157954556214,
+        -5.759573812598489,
+        19.101608967093654,
+        42.99718787495911,
+        65.99902166627237,
+        88.14589669677409,
+        109.4467492043747
+      ],
+      [
+        -125.06810733575091,
+        -90.92233473424605,
+        -60.07004812695939,
+        -31.309168537061908,
+        -4.105461721180291,
+        21.83654401178336,
+        46.6977267914755,
+        70.59330569934096,
+        93.59513949065422,
+        115.74201452115594,
+        137.04286702875658
+      ],
+      [
+        -95.46500553848043,
+        -61.31923293697557,
+        -30.46694632968891,
+        -1.7060667397914244,
+        25.497640076090192,
+        51.43964580905384,
+        76.30082858874599,
+        100.19640749661144,
+        123.1982412879247,
+        145.34511631842642,
+        166.6459688260271
+      ],
+      [
+        -62.757885535218236,
+        -28.612112933713377,
+        2.240173673573281,
+        31.001053263470766,
+        58.20476007935238,
+        84.14676581231603,
+        109.00794859200818,
+        132.90352749987363,
+        155.9053612911869,
+        178.05223632168858,
+        199.35308882928925
+      ],
+      [
+        -21.94175669875412,
+        12.20401590275074,
+        43.0563025100374,
+        71.81718209993491,
+        99.02088891581653,
+        124.96289464878018,
+        149.82407742847232,
+        173.7196563363378,
+        196.72149012765104,
+        218.86836515815273,
+        240.1692176657534
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "k_display_scale": 1.0,
+    "empirical_goal_rate_matrix": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "goal_rate_display_range": [
+      0.0,
+      0.0
+    ],
+    "goal_rate_matrix": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "rows": [
+      {
+        "chi": 0.0,
+        "gamma": 1.0,
+        "raw_k": -178.74807973224543,
+        "k": -178.74807973224543,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.0,
+        "raw_k": -144.60230713074057,
+        "k": -144.60230713074057,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.0,
+        "raw_k": -113.75002052345391,
+        "k": -113.75002052345391,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.0,
+        "raw_k": -84.98914093355643,
+        "k": -84.98914093355643,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.0,
+        "raw_k": -57.78543411767481,
+        "k": -57.78543411767481,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.0,
+        "raw_k": -31.84342838471116,
+        "k": -31.84342838471116,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.0,
+        "raw_k": -6.982245605019017,
+        "k": -6.982245605019017,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.0,
+        "raw_k": 16.91333330284644,
+        "k": 16.91333330284644,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.0,
+        "raw_k": 39.9151670941597,
+        "k": 39.9151670941597,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.0,
+        "raw_k": 62.062042124661446,
+        "k": 62.062042124661446,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.0,
+        "raw_k": 83.36289463226208,
+        "k": 83.36289463226208,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.1,
+        "raw_k": -152.66422516013276,
+        "k": -152.66422516013276,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.1,
+        "raw_k": -118.5184525586279,
+        "k": -118.5184525586279,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.1,
+        "raw_k": -87.66616595134124,
+        "k": -87.66616595134124,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.1,
+        "raw_k": -58.90528636144376,
+        "k": -58.90528636144376,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.1,
+        "raw_k": -31.70157954556214,
+        "k": -31.70157954556214,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.1,
+        "raw_k": -5.759573812598489,
+        "k": -5.759573812598489,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.1,
+        "raw_k": 19.101608967093654,
+        "k": 19.101608967093654,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.1,
+        "raw_k": 42.99718787495911,
+        "k": 42.99718787495911,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.1,
+        "raw_k": 65.99902166627237,
+        "k": 65.99902166627237,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.1,
+        "raw_k": 88.14589669677409,
+        "k": 88.14589669677409,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.1,
+        "raw_k": 109.4467492043747,
+        "k": 109.4467492043747,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.2,
+        "raw_k": -125.06810733575091,
+        "k": -125.06810733575091,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.2,
+        "raw_k": -90.92233473424605,
+        "k": -90.92233473424605,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.2,
+        "raw_k": -60.07004812695939,
+        "k": -60.07004812695939,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.2,
+        "raw_k": -31.309168537061908,
+        "k": -31.309168537061908,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.2,
+        "raw_k": -4.105461721180291,
+        "k": -4.105461721180291,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.2,
+        "raw_k": 21.83654401178336,
+        "k": 21.83654401178336,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.2,
+        "raw_k": 46.6977267914755,
+        "k": 46.6977267914755,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.2,
+        "raw_k": 70.59330569934096,
+        "k": 70.59330569934096,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.2,
+        "raw_k": 93.59513949065422,
+        "k": 93.59513949065422,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.2,
+        "raw_k": 115.74201452115594,
+        "k": 115.74201452115594,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.2,
+        "raw_k": 137.04286702875658,
+        "k": 137.04286702875658,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.3,
+        "raw_k": -95.46500553848043,
+        "k": -95.46500553848043,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.3,
+        "raw_k": -61.31923293697557,
+        "k": -61.31923293697557,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.3,
+        "raw_k": -30.46694632968891,
+        "k": -30.46694632968891,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.3,
+        "raw_k": -1.7060667397914244,
+        "k": -1.7060667397914244,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.3,
+        "raw_k": 25.497640076090192,
+        "k": 25.497640076090192,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.3,
+        "raw_k": 51.43964580905384,
+        "k": 51.43964580905384,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.3,
+        "raw_k": 76.30082858874599,
+        "k": 76.30082858874599,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.3,
+        "raw_k": 100.19640749661144,
+        "k": 100.19640749661144,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.3,
+        "raw_k": 123.1982412879247,
+        "k": 123.1982412879247,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.3,
+        "raw_k": 145.34511631842642,
+        "k": 145.34511631842642,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.3,
+        "raw_k": 166.6459688260271,
+        "k": 166.6459688260271,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.4,
+        "raw_k": -62.757885535218236,
+        "k": -62.757885535218236,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.4,
+        "raw_k": -28.612112933713377,
+        "k": -28.612112933713377,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.4,
+        "raw_k": 2.240173673573281,
+        "k": 2.240173673573281,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.4,
+        "raw_k": 31.001053263470766,
+        "k": 31.001053263470766,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.4,
+        "raw_k": 58.20476007935238,
+        "k": 58.20476007935238,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.4,
+        "raw_k": 84.14676581231603,
+        "k": 84.14676581231603,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.4,
+        "raw_k": 109.00794859200818,
+        "k": 109.00794859200818,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.4,
+        "raw_k": 132.90352749987363,
+        "k": 132.90352749987363,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.4,
+        "raw_k": 155.9053612911869,
+        "k": 155.9053612911869,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.4,
+        "raw_k": 178.05223632168858,
+        "k": 178.05223632168858,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.4,
+        "raw_k": 199.35308882928925,
+        "k": 199.35308882928925,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.5,
+        "raw_k": -21.94175669875412,
+        "k": -21.94175669875412,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.5,
+        "raw_k": 12.20401590275074,
+        "k": 12.20401590275074,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.5,
+        "raw_k": 43.0563025100374,
+        "k": 43.0563025100374,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.5,
+        "raw_k": 71.81718209993491,
+        "k": 71.81718209993491,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.5,
+        "raw_k": 99.02088891581653,
+        "k": 99.02088891581653,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.5,
+        "raw_k": 124.96289464878018,
+        "k": 124.96289464878018,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.5,
+        "raw_k": 149.82407742847232,
+        "k": 149.82407742847232,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.5,
+        "raw_k": 173.7196563363378,
+        "k": 173.7196563363378,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.5,
+        "raw_k": 196.72149012765104,
+        "k": 196.72149012765104,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.5,
+        "raw_k": 218.86836515815273,
+        "k": 218.86836515815273,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.5,
+        "raw_k": 240.1692176657534,
+        "k": 240.1692176657534,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.6,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.7,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.8,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 1.9,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.0,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.1,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.2,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.3,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.4,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.5,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.6,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.7,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.8,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 0.9,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      },
+      {
+        "chi": 1.0,
+        "gamma": 2.0,
+        "raw_k": 0.0,
+        "k": 0.0,
+        "empirical_goal_selection_rate": 0.0,
+        "goal_selection_rate": 0.0
+      }
+    ]
+  },
+  "selection_evaluation": {
+    "selection_rows": [
+      {
+        "node_count": 10,
+        "tau_A_raw": 0.0,
+        "tau_B_raw": 3.0,
+        "tau_goal_raw": 6.0,
+        "tau_compete_raw": 3.0,
+        "tau_decoy_raw": 0.0,
+        "tau_A_bid_intensity_raw": 0.0,
+        "tau_B_bid_intensity_raw": 3.0,
+        "tau_goal_bid_intensity_raw": 18.0,
+        "tau_compete_bid_intensity_raw": 3.0,
+        "tau_decoy_influenced_nodes_raw": 6.0,
+        "before_A": 0.0,
+        "before_B": 3.0,
+        "after_goal": 18.0,
+        "after_compete": 3.0,
+        "tau_A": 0.0,
+        "tau_B": 3.0,
+        "tau_goal": 18.0,
+        "tau_compete": 3.0,
+        "tau_decoy": 6.0
+      }
+    ],
+    "time_cost_success_rates": [
+      {
+        "bin_index": 1,
+        "bin_label": "635-1166",
+        "lower_time_cost": 635.387368,
+        "upper_time_cost": 1166.243819,
+        "DIM_raw": 1.0,
+        "DIM": 1.0,
+        "PRM_raw": 1.0,
+        "PRM": 1.0,
+        "TRAIM_raw": 0.0,
+        "TRAIM": 0.0,
+        "TOCA_raw": 0.5,
+        "TOCA": 0.5
+      },
+      {
+        "bin_index": 2,
+        "bin_label": "1166-1385",
+        "lower_time_cost": 1166.243819,
+        "upper_time_cost": 1384.720607,
+        "DIM_raw": 1.0,
+        "DIM": 1.0,
+        "PRM_raw": 1.0,
+        "PRM": 1.0,
+        "TRAIM_raw": 0.0,
+        "TRAIM": 0.0,
+        "TOCA_raw": 0.5,
+        "TOCA": 0.5
+      },
+      {
+        "bin_index": 3,
+        "bin_label": "1385-1403",
+        "lower_time_cost": 1384.720607,
+        "upper_time_cost": 1402.770232,
+        "DIM_raw": 1.0,
+        "DIM": 1.0,
+        "PRM_raw": 1.0,
+        "PRM": 1.0,
+        "TRAIM_raw": 0.0,
+        "TRAIM": 0.0,
+        "TOCA_raw": 1.0,
+        "TOCA": 1.0
+      },
+      {
+        "bin_index": 4,
+        "bin_label": "1403-1642",
+        "lower_time_cost": 1402.770232,
+        "upper_time_cost": 1642.335848,
+        "DIM_raw": 1.0,
+        "DIM": 1.0,
+        "PRM_raw": 1.0,
+        "PRM": 1.0,
+        "TRAIM_raw": 1.0,
+        "TRAIM": 1.0,
+        "TOCA_raw": 0.5,
+        "TOCA": 0.5
+      },
+      {
+        "bin_index": 5,
+        "bin_label": "1642-1956",
+        "lower_time_cost": 1642.335848,
+        "upper_time_cost": 1956.195822,
+        "DIM_raw": 1.0,
+        "DIM": 1.0,
+        "PRM_raw": 1.0,
+        "PRM": 1.0,
+        "TRAIM_raw": 0.0,
+        "TRAIM": 0.0,
+        "TOCA_raw": 0.3333333333333333,
+        "TOCA": 0.3333333333333333
+      }
+    ]
+  },
+  "strategy_evaluation": {
+    "rows": [
+      {
+        "node_count": 10,
+        "F": 2.0,
+        "R": 4.0,
+        "RF": 1.0
+      }
+    ]
+  },
+  "mechanism_comparison": {
+    "participant_rows": [
+      {
+        "node_count": 10,
+        "DIM_unique_participants_raw": 8.0,
+        "DIM_participation_intensity_raw": 8.0,
+        "DIM_raw": 8.0,
+        "DIM": 8.0,
+        "PRM_unique_participants_raw": 10.0,
+        "PRM_participation_intensity_raw": 10.0,
+        "PRM_raw": 10.0,
+        "PRM": 10.0,
+        "TRAIM_unique_participants_raw": 2.0,
+        "TRAIM_participation_intensity_raw": 2.0,
+        "TRAIM_raw": 2.0,
+        "TRAIM": 2.0,
+        "TOCA_unique_participants_raw": 6.0,
+        "TOCA_participation_intensity_raw": 6.0,
+        "TOCA_raw": 6.0,
+        "TOCA": 6.0
+      }
+    ],
+    "offloaded_curve_rows": [
+      {
+        "task_count": 5,
+        "DIM_raw": 3.0,
+        "DIM_std_error": null,
+        "DIM": 3.0,
+        "PRM_raw": 4.0,
+        "PRM_std_error": null,
+        "PRM": 4.0,
+        "TRAIM_raw": 1.0,
+        "TRAIM_std_error": null,
+        "TRAIM": 1.0,
+        "TOCA_raw": 2.0,
+        "TOCA_std_error": null,
+        "TOCA": 2.0
+      }
+    ],
+    "task_bid_rows": {
+      "DIM": [
+        1207.1480012655575,
+        0.0,
+        377.6300319064717,
+        0.0,
+        194.57661741411448,
+        0.0,
+        1091.4617818465972,
+        0.0,
+        0.0,
+        null
+      ],
+      "PRM": [
+        832.9349346849956,
+        0.0,
+        174.91683152656833,
+        0.0,
+        0.0,
+        0.0,
+        733.8749032915584,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "TRAIM": [
+        null,
+        null,
+        null,
+        null,
+        589.6078412428739,
+        null,
+        null,
+        205.77648632348163,
+        null,
+        null
+      ],
+      "TOCA": [
+        null,
+        616.1691871611968,
+        null,
+        null,
+        null,
+        653.0330510262928,
+        1167.5222532352097,
+        791.3266307231643,
+        511.0266624250627,
+        312.01675975233934
+      ]
+    },
+    "task_price_rows": {
+      "DIM": [
+        1262.7054093563252,
+        31.021860568517013,
+        746.388106424045,
+        0.0,
+        541.3923657085193,
+        49.1322292868839,
+        1143.8826252013303,
+        105.21545276542622,
+        55.01282980757651,
+        null
+      ],
+      "PRM": [
+        937.4045494407312,
+        0.0,
+        206.12727268377535,
+        0.0,
+        23.07385819141814,
+        0.0,
+        830.4312832243672,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "TRAIM": [
+        null,
+        null,
+        null,
+        null,
+        589.6078412428739,
+        null,
+        null,
+        205.77648632348163,
+        null,
+        null
+      ],
+      "TOCA": [
+        null,
+        7.0,
+        null,
+        null,
+        null,
+        7.0,
+        22.0,
+        16.0,
+        7.0,
+        4.0
+      ]
+    },
+    "task_order_by_time_cost": [
+      10,
+      4,
+      9,
+      2,
+      6,
+      8,
+      5,
+      7,
+      1,
+      3
+    ],
+    "toca_raw": {
+      "round_rows": [
+        {
+          "round_index": 0,
+          "task_id": "task_1",
+          "arrival_time": 0,
+          "deadline": 5,
+          "candidate_count": 0,
+          "decision": "REJECTED",
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "net_utility": 0.0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "round_index": 1,
+          "task_id": "task_2",
+          "arrival_time": 2,
+          "deadline": 7,
+          "candidate_count": 4,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_9",
+          "selected_time_slots": "2",
+          "net_utility": 609.169187,
+          "rejection_reason": ""
+        },
+        {
+          "round_index": 2,
+          "task_id": "task_3",
+          "arrival_time": 3,
+          "deadline": 8,
+          "candidate_count": 0,
+          "decision": "REJECTED",
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "net_utility": 0.0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "round_index": 3,
+          "task_id": "task_4",
+          "arrival_time": 5,
+          "deadline": 10,
+          "candidate_count": 0,
+          "decision": "REJECTED",
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "net_utility": 0.0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "round_index": 4,
+          "task_id": "task_5",
+          "arrival_time": 6,
+          "deadline": 11,
+          "candidate_count": 0,
+          "decision": "REJECTED",
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "net_utility": 0.0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "round_index": 5,
+          "task_id": "task_6",
+          "arrival_time": 8,
+          "deadline": 13,
+          "candidate_count": 1,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_9",
+          "selected_time_slots": "8",
+          "net_utility": 646.033051,
+          "rejection_reason": ""
+        },
+        {
+          "round_index": 6,
+          "task_id": "task_7",
+          "arrival_time": 9,
+          "deadline": 14,
+          "candidate_count": 1,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_10",
+          "selected_time_slots": "9;10",
+          "net_utility": 1145.522253,
+          "rejection_reason": ""
+        },
+        {
+          "round_index": 7,
+          "task_id": "task_8",
+          "arrival_time": 11,
+          "deadline": 16,
+          "candidate_count": 1,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_2",
+          "selected_time_slots": "11;12",
+          "net_utility": 775.326631,
+          "rejection_reason": ""
+        },
+        {
+          "round_index": 8,
+          "task_id": "task_9",
+          "arrival_time": 12,
+          "deadline": 17,
+          "candidate_count": 5,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_8",
+          "selected_time_slots": "12",
+          "net_utility": 504.026662,
+          "rejection_reason": ""
+        },
+        {
+          "round_index": 9,
+          "task_id": "task_10",
+          "arrival_time": 14,
+          "deadline": 19,
+          "candidate_count": 2,
+          "decision": "ACCEPTED",
+          "selected_bs": "bs_8",
+          "selected_time_slots": "14",
+          "net_utility": 308.01676,
+          "rejection_reason": ""
+        }
+      ],
+      "task_result_rows": [
+        {
+          "task_id": "task_1",
+          "arrival_time": 0,
+          "deadline": 5,
+          "task_class": "A",
+          "bid": 1368.422838,
+          "accepted": false,
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "payment": 0.0,
+          "operational_cost": 0.0,
+          "dynamic_price": 0.0,
+          "smd_utility": 0.0,
+          "social_welfare_contribution": 0.0,
+          "cpu_demand": 5,
+          "subchannel_demand": 3,
+          "candidate_count": 0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "task_id": "task_2",
+          "arrival_time": 2,
+          "deadline": 7,
+          "task_class": "C",
+          "bid": 616.169187,
+          "accepted": true,
+          "selected_bs": "bs_9",
+          "selected_time_slots": "2",
+          "payment": 7.0,
+          "operational_cost": 3.5,
+          "dynamic_price": 3.5,
+          "smd_utility": 609.169187,
+          "social_welfare_contribution": 612.669187,
+          "cpu_demand": 2,
+          "subchannel_demand": 3,
+          "candidate_count": 4,
+          "rejection_reason": ""
+        },
+        {
+          "task_id": "task_3",
+          "arrival_time": 3,
+          "deadline": 8,
+          "task_class": "C",
+          "bid": 1415.547955,
+          "accepted": false,
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "payment": 0.0,
+          "operational_cost": 0.0,
+          "dynamic_price": 0.0,
+          "smd_utility": 0.0,
+          "social_welfare_contribution": 0.0,
+          "cpu_demand": 5,
+          "subchannel_demand": 1,
+          "candidate_count": 0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "task_id": "task_4",
+          "arrival_time": 5,
+          "deadline": 10,
+          "task_class": "B",
+          "bid": 357.59141,
+          "accepted": false,
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "payment": 0.0,
+          "operational_cost": 0.0,
+          "dynamic_price": 0.0,
+          "smd_utility": 0.0,
+          "social_welfare_contribution": 0.0,
+          "cpu_demand": 1,
+          "subchannel_demand": 2,
+          "candidate_count": 0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "task_id": "task_5",
+          "arrival_time": 6,
+          "deadline": 11,
+          "task_class": "C",
+          "bid": 1567.42182,
+          "accepted": false,
+          "selected_bs": null,
+          "selected_time_slots": "",
+          "payment": 0.0,
+          "operational_cost": 0.0,
+          "dynamic_price": 0.0,
+          "smd_utility": 0.0,
+          "social_welfare_contribution": 0.0,
+          "cpu_demand": 4,
+          "subchannel_demand": 1,
+          "candidate_count": 0,
+          "rejection_reason": "no_feasible_scheme"
+        },
+        {
+          "task_id": "task_6",
+          "arrival_time": 8,
+          "deadline": 13,
+          "task_class": "C",
+          "bid": 653.033051,
+          "accepted": true,
+          "selected_bs": "bs_9",
+          "selected_time_slots": "8",
+          "payment": 7.0,
+          "operational_cost": 3.5,
+          "dynamic_price": 3.5,
+          "smd_utility": 646.033051,
+          "social_welfare_contribution": 649.533051,
+          "cpu_demand": 2,
+          "subchannel_demand": 3,
+          "candidate_count": 1,
+          "rejection_reason": ""
+        },
+        {
+          "task_id": "task_7",
+          "arrival_time": 9,
+          "deadline": 14,
+          "task_class": "A",
+          "bid": 1167.522253,
+          "accepted": true,
+          "selected_bs": "bs_10",
+          "selected_time_slots": "9;10",
+          "payment": 22.0,
+          "operational_cost": 11.0,
+          "dynamic_price": 11.0,
+          "smd_utility": 1145.522253,
+          "social_welfare_contribution": 1156.522253,
+          "cpu_demand": 4,
+          "subchannel_demand": 3,
+          "candidate_count": 1,
+          "rejection_reason": ""
+        },
+        {
+          "task_id": "task_8",
+          "arrival_time": 11,
+          "deadline": 16,
+          "task_class": "B",
+          "bid": 791.326631,
+          "accepted": true,
+          "selected_bs": "bs_2",
+          "selected_time_slots": "11;12",
+          "payment": 16.0,
+          "operational_cost": 8.0,
+          "dynamic_price": 8.0,
+          "smd_utility": 775.326631,
+          "social_welfare_contribution": 783.326631,
+          "cpu_demand": 3,
+          "subchannel_demand": 2,
+          "candidate_count": 1,
+          "rejection_reason": ""
+        },
+        {
+          "task_id": "task_9",
+          "arrival_time": 12,
+          "deadline": 17,
+          "task_class": "C",
+          "bid": 511.026662,
+          "accepted": true,
+          "selected_bs": "bs_8",
+          "selected_time_slots": "12",
+          "payment": 7.0,
+          "operational_cost": 3.5,
+          "dynamic_price": 3.5,
+          "smd_utility": 504.026662,
+          "social_welfare_contribution": 507.526662,
+          "cpu_demand": 2,
+          "subchannel_demand": 3,
+          "candidate_count": 5,
+          "rejection_reason": ""
+        },
+        {
+          "task_id": "task_10",
+          "arrival_time": 14,
+          "deadline": 19,
+          "task_class": "C",
+          "bid": 312.01676,
+          "accepted": true,
+          "selected_bs": "bs_8",
+          "selected_time_slots": "14",
+          "payment": 4.0,
+          "operational_cost": 2.0,
+          "dynamic_price": 2.0,
+          "smd_utility": 308.01676,
+          "social_welfare_contribution": 310.01676,
+          "cpu_demand": 1,
+          "subchannel_demand": 2,
+          "candidate_count": 2,
+          "rejection_reason": ""
+        }
+      ],
+      "resource_usage_rows": [
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_1",
+          "node_id": "node_1",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 11,
+          "used_cpu": 3,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.428571,
+          "used_subchannels": 2,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.4
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 12,
+          "used_cpu": 3,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.428571,
+          "used_subchannels": 2,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.4
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_2",
+          "node_id": "node_2",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_3",
+          "node_id": "node_3",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_4",
+          "node_id": "node_4",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 5,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_5",
+          "node_id": "node_5",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 8,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_6",
+          "node_id": "node_6",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 8,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_7",
+          "node_id": "node_7",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 7,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 5,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 12,
+          "used_cpu": 2,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.333333,
+          "used_subchannels": 3,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.75
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 14,
+          "used_cpu": 1,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.166667,
+          "used_subchannels": 2,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.5
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_8",
+          "node_id": "node_8",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 4,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 2,
+          "used_cpu": 2,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.222222,
+          "used_subchannels": 3,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.5
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 8,
+          "used_cpu": 2,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.222222,
+          "used_subchannels": 3,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.5
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 9,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 10,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_9",
+          "node_id": "node_9",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 9,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 0,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 1,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 2,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 3,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 4,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 5,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 6,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 7,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 8,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 9,
+          "used_cpu": 4,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.666667,
+          "used_subchannels": 3,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.5
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 10,
+          "used_cpu": 4,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.666667,
+          "used_subchannels": 3,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.5
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 11,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 12,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 13,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 14,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 15,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 16,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 17,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 18,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        },
+        {
+          "bs_id": "bs_10",
+          "node_id": "node_10",
+          "time_slot": 19,
+          "used_cpu": 0,
+          "cpu_capacity": 6,
+          "cpu_utilization": 0.0,
+          "used_subchannels": 0,
+          "subchannel_capacity": 6,
+          "subchannel_utilization": 0.0
+        }
+      ],
+      "summary_rows": [
+        {
+          "mechanism": "TOCA",
+          "accepted_task_count": 6,
+          "rejected_task_count": 4,
+          "accepted_goal_task_count": 1,
+          "total_goal_task_count": 2,
+          "total_payment": 63.0,
+          "total_operational_cost": 31.5,
+          "user_total_utility": 3988.094544,
+          "social_welfare": 4019.594544,
+          "resource_utilization": 0.017962,
+          "individual_rationality": true
+        }
+      ]
+    },
+    "pcspe_raw": {},
+    "task_statistics": {
+      "mechanisms": [
+        "DIM",
+        "PRM",
+        "TRAIM",
+        "TOCA"
+      ],
+      "total_tasks": 10,
+      "completion_rate_samples": {
+        "DIM": [
+          0.9
+        ],
+        "PRM": [
+          1.0
+        ],
+        "TRAIM": [
+          0.2
+        ],
+        "TOCA": [
+          0.6
+        ]
+      },
+      "completed_count_samples": {
+        "DIM": [
+          9
+        ],
+        "PRM": [
+          10
+        ],
+        "TRAIM": [
+          2
+        ],
+        "TOCA": [
+          6
+        ]
+      },
+      "winning_bid_samples": {
+        "DIM": [
+          1207.1480012655575,
+          0.0,
+          377.6300319064717,
+          0.0,
+          194.57661741411448,
+          0.0,
+          1091.4617818465972,
+          0.0,
+          0.0
+        ],
+        "PRM": [
+          832.9349346849956,
+          0.0,
+          174.91683152656833,
+          0.0,
+          0.0,
+          0.0,
+          733.8749032915584,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "TRAIM": [
+          589.6078412428739,
+          205.77648632348163
+        ],
+        "TOCA": [
+          616.1691871611968,
+          653.0330510262928,
+          1167.5222532352097,
+          791.3266307231643,
+          511.0266624250627,
+          312.01675975233934
+        ]
+      },
+      "transaction_price_samples": {
+        "DIM": [
+          1262.7054093563252,
+          31.021860568517013,
+          746.388106424045,
+          0.0,
+          541.3923657085193,
+          49.1322292868839,
+          1143.8826252013303,
+          105.21545276542622,
+          55.01282980757651
+        ],
+        "PRM": [
+          937.4045494407312,
+          0.0,
+          206.12727268377535,
+          0.0,
+          23.07385819141814,
+          0.0,
+          830.4312832243672,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "TRAIM": [
+          589.6078412428739,
+          205.77648632348163
+        ],
+        "TOCA": [
+          7.0,
+          7.0,
+          22.0,
+          16.0,
+          7.0,
+          4.0
+        ]
+      },
+      "common_task_ratio_rows": [
+        {
+          "repeat_index": 0,
+          "metric": "winning_bid",
+          "common_task_count": 9,
+          "DIM_mean": 318.9796036036379,
+          "PRM_mean": 193.52518550034694,
+          "PRM_over_DIM": 0.6067008150803904
+        },
+        {
+          "repeat_index": 0,
+          "metric": "transaction_price",
+          "common_task_count": 9,
+          "DIM_mean": 437.1945421242915,
+          "PRM_mean": 221.89299594892134,
+          "PRM_over_DIM": 0.5075383486508361
+        }
+      ]
+    },
+    "utility_rows": {
+      "25": [
+        {
+          "node_count": 10,
+          "DIM_raw": 16225.277433070094,
+          "DIM_display": 162.25277433070093,
+          "DIM": 162.25277433070093,
+          "PRM_raw": 22451.7232813499,
+          "PRM_display": 224.517232813499,
+          "PRM": 224.517232813499,
+          "TRAIM_raw": 1782.134212481747,
+          "TRAIM_display": 17.82134212481747,
+          "TRAIM": 17.82134212481747,
+          "TOCA_raw": 22063.528658,
+          "TOCA_display": 220.63528657999998,
+          "TOCA": 220.63528657999998
+        }
+      ]
+    }
+  },
+  "preference_mean_effect": {
+    "dim_rows": [
+      {
+        "preference_mean": 0.0,
+        "values": [
+          1.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.37131286199623664
+        ]
+      },
+      {
+        "preference_mean": 0.1,
+        "values": [
+          0.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.38464662184077913
+        ]
+      },
+      {
+        "preference_mean": 0.2,
+        "values": [
+          0.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.34482946861977704
+        ]
+      },
+      {
+        "preference_mean": 0.3,
+        "values": [
+          2.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.3390889294019085
+        ]
+      },
+      {
+        "preference_mean": 0.4,
+        "values": [
+          2.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.39057189090223865
+        ]
+      },
+      {
+        "preference_mean": 0.5,
+        "values": [
+          4.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.37350007812568253
+        ]
+      },
+      {
+        "preference_mean": 0.6,
+        "values": [
+          6.0
+        ],
+        "total_values": [
+          7.0
+        ],
+        "threshold_values": [
+          0.5565343428183382
+        ]
+      },
+      {
+        "preference_mean": 0.7,
+        "values": [
+          0.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.48559834644185607
+        ]
+      },
+      {
+        "preference_mean": 0.8,
+        "values": [
+          9.0
+        ],
+        "total_values": [
+          9.0
+        ],
+        "threshold_values": [
+          0.41773277580984536
+        ]
+      },
+      {
+        "preference_mean": 0.9,
+        "values": [
+          10.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.41753821853681466
+        ]
+      },
+      {
+        "preference_mean": 1.0,
+        "values": [
+          9.0
+        ],
+        "total_values": [
+          10.0
+        ],
+        "threshold_values": [
+          0.40501283665828386
+        ]
+      }
+    ],
+    "prm_rows": [
+      {
+        "preference_mean": 0.0,
+        "values": [
+          10.0
+        ]
+      },
+      {
+        "preference_mean": 0.1,
+        "values": [
+          20.0
+        ]
+      },
+      {
+        "preference_mean": 0.2,
+        "values": [
+          10.0
+        ]
+      },
+      {
+        "preference_mean": 0.3,
+        "values": [
+          10.0
+        ]
+      },
+      {
+        "preference_mean": 0.4,
+        "values": [
+          10.0
+        ]
+      },
+      {
+        "preference_mean": 0.5,
+        "values": [
+          20.0
+        ]
+      },
+      {
+        "preference_mean": 0.6,
+        "values": [
+          17.0
+        ]
+      },
+      {
+        "preference_mean": 0.7,
+        "values": [
+          19.0
+        ]
+      },
+      {
+        "preference_mean": 0.8,
+        "values": [
+          30.0
+        ]
+      },
+      {
+        "preference_mean": 0.9,
+        "values": [
+          20.0
+        ]
+      },
+      {
+        "preference_mean": 1.0,
+        "values": [
+          40.0
+        ]
+      }
+    ]
+  },
+  "validations": {
+    "individual_rationality": true,
+    "truthfulness": {
+      "honest_bid_preserved": true,
+      "inflated_bid_cancelled": true
+    },
+    "computational_efficiency": {
+      "claimed_complexity": "O(IJlogJ)",
+      "validation_runtime_ms": 1.353
+    },
+    "minimum_node_utility": 0.0
+  },
+  "truthfulness_check": {
+    "rows": [
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.5,
+        "won": true,
+        "won_task_count": 4,
+        "payment": 1923.2220574577086,
+        "utility": -1723.902959876699,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": true,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.5,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 126.54090184168106,
+        "utility": -54.32818188935414,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": true,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.5,
+        "reported_bid": 246.30620941414386,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.7,
+        "reported_bid": 344.8286931798014,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.9,
+        "reported_bid": 443.351176945459,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.0,
+        "reported_bid": 492.61241882828773,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.1,
+        "reported_bid": 541.8736607111166,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.3,
+        "reported_bid": 640.3961444767741,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.5,
+        "reported_bid": 738.9186282424316,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      }
+    ],
+    "audit_rows": [
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "truthful_utility": 0.0,
+        "max_utility": 0.0,
+        "best_bid_multipliers": "0.5;0.7;0.9;1.0;1.1;1.3;1.5",
+        "passed_truthfulness_check": true,
+        "audit_note": "truthful bid maximizes utility in this fixed-bid scan"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "truthful_utility": 0.0,
+        "max_utility": 0.0,
+        "best_bid_multipliers": "0.7;0.9;1.0;1.1;1.3;1.5",
+        "passed_truthfulness_check": true,
+        "audit_note": "truthful bid maximizes utility in this fixed-bid scan"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "truthful_utility": 487.61241882828773,
+        "max_utility": 487.61241882828773,
+        "best_bid_multipliers": "0.5;0.7;0.9;1.0;1.1;1.3;1.5",
+        "passed_truthfulness_check": true,
+        "audit_note": "truthful bid maximizes utility in this fixed-bid scan"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "truthful_utility": 0.0,
+        "max_utility": 0.0,
+        "best_bid_multipliers": "0.7;0.9;1.0;1.1;1.3;1.5",
+        "passed_truthfulness_check": true,
+        "audit_note": "truthful bid maximizes utility in this fixed-bid scan"
+      }
+    ],
+    "scan_audit_rows": [
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "DIM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.5,
+        "won": true,
+        "won_task_count": 4,
+        "payment": 1923.2220574577086,
+        "utility": -1723.902959876699,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": true,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "PRM",
+        "target_id": "node_1",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "node_1",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.5,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 126.54090184168106,
+        "utility": -54.32818188935414,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": true,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.7,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 0.9,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.0,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.1,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.3,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TRAIM",
+        "target_id": "bs_2",
+        "bid_multiplier": 1.5,
+        "won": false,
+        "won_task_count": 0,
+        "payment": null,
+        "utility": 0.0,
+        "truthful_bid_reference": "1.0c",
+        "task_id": "bs_2",
+        "true_bid": null,
+        "reported_bid": null,
+        "accepted": false,
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.5,
+        "reported_bid": 246.30620941414386,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.7,
+        "reported_bid": 344.8286931798014,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 0.9,
+        "reported_bid": 443.351176945459,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.0,
+        "reported_bid": 492.61241882828773,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.1,
+        "reported_bid": 541.8736607111166,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.3,
+        "reported_bid": 640.3961444767741,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      },
+      {
+        "mechanism": "TOCA",
+        "target_id": "task_1",
+        "task_id": "task_1",
+        "true_bid": 492.61241882828773,
+        "bid_multiplier": 1.5,
+        "reported_bid": 738.9186282424316,
+        "accepted": true,
+        "won": true,
+        "won_task_count": 1,
+        "payment": 5.0,
+        "utility": 487.61241882828773,
+        "truthful_bid_reference": "1.0v",
+        "truthfulness_status": "passed"
+      }
+    ],
+    "notes": [
+      "DIM and PRM scans reuse the realized bid book and recompute winners/payments with all non-target bids fixed.",
+      "PRM dynamic preference updates are not re-simulated for each report; this is an ex-post implementation audit.",
+      "TRAIM scans multiply one base station's reported cost for allocation/payment while holding physical coverage and true costs fixed.",
+      "TOCA scans multiply one target SMD task's reported bid while holding all other tasks, positions, deadlines, and base-station capacities fixed."
+    ]
+  },
+  "audit_notes": [
+    {
+      "topic": "raw_results",
+      "status": "passed",
+      "note": "Simulation outputs are aggregated directly; calibration and forced ordering post-processing have been removed."
+    },
+    {
+      "topic": "display_scaling",
+      "status": "documented",
+      "note": "Utility plot fields use display_value = raw_value / 100; raw utility fields are preserved as *_raw."
+    },
+    {
+      "topic": "dim_strategy",
+      "status": "documented",
+      "note": "Primary DIM runs use strategy=F; Figure 3-8 still reports F/R/RF strategy comparisons."
+    },
+    {
+      "topic": "dim_secondary_bids",
+      "status": "documented",
+      "note": "DIM-derived rounds may allow secondary positive real-task bids when dim_allow_secondary_positive_bids=true; these bids are generated before allocation and are part of the raw bid book."
+    },
+    {
+      "topic": "zero_cost_bids",
+      "status": "documented",
+      "note": "When allow_zero_cost_bids=true, truthful non-exaggerated DIM bids in [-150, 0] and PRM bids in [-1000, 0] are clipped to the zero reserve and kept as valid zero-price auction bids; monitored exaggerated bids remain cancelled."
+    },
+    {
+      "topic": "selection_metrics",
+      "status": "documented",
+      "note": "Figure 3-6 plots raw positive-bid before/after participation intensity for A/B/goal/compete; zero-reserve bids remain in the bid book and completion statistics but are not counted as positive-bid intensity. tau_decoy is preserved in CSV only and is not plotted."
+    },
+    {
+      "topic": "participation_metrics",
+      "status": "documented",
+      "note": "Figure 4-2 plots raw effective participation intensity for DIM/PRM/TRAIM/TOCA; TOCA participants are accepted SMD task requests, while DIM/PRM/TRAIM participants are resource providers or bidders."
+    },
+    {
+      "topic": "toca_simplification",
+      "status": "documented",
+      "note": "TOCA is implemented as a comparable simplified online combinatorial-auction MEC baseline: it preserves online arrivals, candidate offloading schemes, position coverage, deadlines, resource constraints, dynamic resource prices, and accept/reject decisions."
+    },
+    {
+      "topic": "toca_theory_scope",
+      "status": "documented",
+      "note": "The TOCA baseline simplifies the full paper mechanism by omitting the primal-dual theoretical price update proof machinery and complex VM-type enumeration; no post-simulation calibration is applied to raw TOCA data."
+    },
+    {
+      "topic": "toca_figures",
+      "status": "documented",
+      "note": "TOCA is included in participation, task success-rate, offloaded-task, mechanism-summary, task-level heatmap, utility, and truthfulness figures; audit notes document that Figure 4-2 mixes different participant semantics."
+    },
+    {
+      "topic": "pcspe_equilibrium_scope",
+      "status": "documented",
+      "note": "PC-SPE is modeled as a Stackelberg subgame-perfect-equilibrium price-competition mechanism, not a truthful auction, and is therefore excluded from the truthfulness bid-scan."
+    },
+    {
+      "topic": "pcspe_metrics",
+      "status": "documented",
+      "note": "For PC-SPE, offloaded_tasks is the equivalent splittable task volume sum(1-x0), participants are unique CRPs with positive allocation fractions, and task success-rate bins use fractional task_success_credit."
+    },
+    {
+      "topic": "pcspe_equilibrium_audit",
+      "status": "documented",
+      "note": "PC-SPE writes pcspe_equilibrium_audit.csv with convergence status, final price change, active CRP counts, CRR profit, social welfare, and a unilateral price-deviation scan for active price-setting CRPs."
+    },
+    {
+      "topic": "paired_task_curves",
+      "status": "documented",
+      "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors; no monotonic smoothing is applied."
+    },
+    {
+      "topic": "representative_heatmap",
+      "status": "documented",
+      "note": "Task-level bid/price heatmaps use the first repeat at comparison_node_count, not a ranking-optimized representative sample."
+    },
+    {
+      "topic": "truthfulness_DIM",
+      "status": "passed",
+      "note": "truthful bid maximizes utility in this fixed-bid scan"
+    },
+    {
+      "topic": "truthfulness_PRM",
+      "status": "passed",
+      "note": "truthful bid maximizes utility in this fixed-bid scan"
+    },
+    {
+      "topic": "truthfulness_TOCA",
+      "status": "passed",
+      "note": "truthful bid maximizes utility in this fixed-bid scan"
+    },
+    {
+      "topic": "truthfulness_TRAIM",
+      "status": "passed",
+      "note": "truthful bid maximizes utility in this fixed-bid scan"
+    }
+  ]
+}

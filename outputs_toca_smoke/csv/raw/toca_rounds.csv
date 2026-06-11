@@ -1,0 +1,9 @@
+round_index,task_id,arrival_time,deadline,candidate_count,decision,selected_bs,selected_time_slots,net_utility,rejection_reason
+0,task_1,0,5,0,REJECTED,,,0.0,no_feasible_scheme
+1,task_2,2,7,1,ACCEPTED,bs_2,2;3,1316.046862,
+2,task_3,4,9,1,ACCEPTED,bs_5,4;5,900.938952,
+3,task_4,6,11,3,ACCEPTED,bs_5,6;7,910.309801,
+4,task_5,8,13,0,REJECTED,,,0.0,no_feasible_scheme
+5,task_6,10,15,0,REJECTED,,,0.0,no_feasible_scheme
+6,task_7,12,17,0,REJECTED,,,0.0,no_feasible_scheme
+7,task_8,14,19,2,ACCEPTED,bs_4,14,930.459418,

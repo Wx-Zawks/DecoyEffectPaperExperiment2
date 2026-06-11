@@ -1,0 +1,3 @@
+repeat_index,metric,common_task_count,DIM_mean,PRM_mean,PRM_over_DIM
+0,winning_bid,1,418.12715517344907,0.0,0.0
+0,transaction_price,1,433.88658309281175,0.0,0.0

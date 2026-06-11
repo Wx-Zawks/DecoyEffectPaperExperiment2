@@ -1,0 +1,11 @@
+task_id,converged,iterations,max_price_change,crr_profit,social_welfare,offload_fraction,local_fraction,active_price_setting_count,active_price_taking_count,unilateral_deviation_passed
+task_1,True,1,0.001793,5.877816,5.939266,0.740857,0.259143,4,6,False
+task_2,True,1,0.001682,1.247572,1.307805,0.679381,0.320619,4,6,False
+task_3,True,1,9e-05,0.806225,0.808858,1.0,0.0,4,6,True
+task_4,True,1,3.7e-05,0.092888,0.094177,0.711661,0.288339,4,6,True
+task_5,True,1,0.000559,1.972427,1.991487,0.752076,0.247924,4,6,True
+task_6,True,1,0.000102,1.103816,1.106632,1.0,0.0,4,6,True
+task_7,True,1,0.001235,5.204916,5.24687,0.798497,0.201503,4,6,True
+task_8,True,1,0.00121,2.941516,2.983899,0.728648,0.271352,4,6,True
+task_9,True,1,0.001776,6.021777,6.083232,0.769351,0.230649,4,6,False
+task_10,True,1,0.000755,3.154175,3.179434,0.758283,0.241717,4,6,True
