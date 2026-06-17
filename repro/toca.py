@@ -129,10 +129,29 @@ def build_toca_environment(
     for index, task in enumerate(tasks):
         arrival = _arrival_time(index, len(tasks), time_slots, deadline_window)
         deadline = min(time_slots - 1, arrival + deadline_window)
-        cpu_demand = _scale_to_int(task.time_cost, _min_time(tasks), _max_time(tasks), 1, 5)
-        subchannel_demand = _scale_to_int(task.reward, _min_reward(tasks), _max_reward(tasks), 1, 3)
+        cpu_demand = _scale_to_int(
+            task.time_cost,
+            _min_time(tasks),
+            _max_time(tasks),
+            int(config.get("toca_cpu_demand_min", 1)),
+            int(config.get("toca_cpu_demand_max", 6)),
+        )
+        subchannel_demand = _scale_to_int(
+            task.reward,
+            _min_reward(tasks),
+            _max_reward(tasks),
+            int(config.get("toca_subchannel_demand_min", 1)),
+            int(config.get("toca_subchannel_demand_max", 3)),
+        )
         local_value = local_execution_cost(task)
-        bid = max(0.0, (local_value + task.reward) * float(config.get("toca_value_scale", 1.0)))
+        normalized_time = _normalized(task.time_cost, _min_time(tasks), _max_time(tasks))
+        value_scale = float(config.get("toca_value_scale", 0.75))
+        local_weight = float(config.get("toca_local_saving_weight", 0.015))
+        time_penalty = float(config.get("toca_time_cost_penalty", 1.25))
+        # TOCA bids are SMD valuations, not provider bids.  They are bounded by
+        # reward and local-cost saving, then penalized for high time-cost jobs so
+        # expensive tasks do not become easier merely because local execution is costly.
+        bid = max(0.0, (task.reward * value_scale + local_value * local_weight) / (1.0 + time_penalty * normalized_time))
         task_class = task_classes.get(task.task_id, "RAW")
         toca_tasks.append(
             TOCATask(
@@ -157,6 +176,8 @@ def build_toca_environment(
 
     base_stations: list[TOCABaseStation] = []
     for index, node in enumerate(nodes):
+        speed_discount = 1.0 / max(node.clock_frequency, 1e-9)
+        heterogeneity = 0.92 + 0.16 * rng.random()
         base_stations.append(
             TOCABaseStation(
                 bs_id=f"bs_{index + 1}",
@@ -165,8 +186,8 @@ def build_toca_environment(
                 subchannel_capacity=rng.randint(int(subchannel_capacity_range[0]), int(subchannel_capacity_range[1])),
                 coverage_radius=rng.uniform(float(bs_radius_range[0]), float(bs_radius_range[1])),
                 position=(rng.uniform(0.0, region_size), rng.uniform(0.0, region_size)),
-                cpu_unit_cost=cpu_unit_cost,
-                subchannel_unit_cost=subchannel_unit_cost,
+                cpu_unit_cost=cpu_unit_cost * speed_discount * heterogeneity,
+                subchannel_unit_cost=subchannel_unit_cost * speed_discount * heterogeneity,
                 used_cpu=[0 for _ in range(time_slots)],
                 used_subchannels=[0 for _ in range(time_slots)],
             )
@@ -217,14 +238,15 @@ def generate_candidate_schemes(task: TOCATask, base_stations: list[TOCABaseStati
             if base_station.used_subchannels[slot] + task.subchannel_demand > base_station.subchannel_capacity:
                 continue
             slot_prices.append((slot, _dynamic_resource_price(task, base_station, slot, config)))
-        required_slots = _required_slot_count(task)
+        required_slots = _required_slot_count(task, config)
         if len(slot_prices) < required_slots:
             continue
         selected_slots = sorted(slot_prices, key=lambda item: (item[1], item[0]))[:required_slots]
         time_slots = sorted(slot for slot, _ in selected_slots)
         dynamic_price = sum(price for _, price in selected_slots)
         operational_cost = _operational_cost(task, base_station, required_slots, config)
-        total_payment = operational_cost + dynamic_price
+        provider_reserve = _provider_reserve_payment(task, config)
+        total_payment = max(operational_cost + dynamic_price, provider_reserve)
         schemes.append(
             TOCAScheme(
                 task_id=task.task_id,
@@ -361,8 +383,9 @@ def _arrival_time(index: int, task_count: int, time_slots: int, deadline_window:
     return min(latest_arrival, int(round(index * latest_arrival / max(1, task_count - 1))))
 
 
-def _required_slot_count(task: TOCATask) -> int:
-    return max(1, math.ceil(task.cpu_demand / 2.0))
+def _required_slot_count(task: TOCATask, config: dict) -> int:
+    divisor = max(1e-9, float(config.get("toca_slot_cpu_divisor", 2.0)))
+    return max(1, math.ceil(task.cpu_demand / divisor))
 
 
 def _operational_cost(task: TOCATask, base_station: TOCABaseStation, slot_count: int, config: dict) -> float:
@@ -380,6 +403,12 @@ def _dynamic_resource_price(task: TOCATask, base_station: TOCABaseStation, slot:
     cpu_price = base_station.cpu_unit_cost * (1.0 + growth * cpu_usage) * task.cpu_demand
     channel_price = base_station.subchannel_unit_cost * (1.0 + growth * channel_usage) * task.subchannel_demand
     return (cpu_price + channel_price) * float(config.get("toca_cost_scale", 1.0))
+
+
+def _provider_reserve_payment(task: TOCATask, config: dict) -> float:
+    reserve_ratio = float(config.get("toca_provider_reserve_ratio", 0.0))
+    local_cost = task.time_cost / max(task.clock_frequency, 1e-9)
+    return max(0.0, reserve_ratio * local_cost)
 
 
 def _accepted_result(task: TOCATask, scheme: TOCAScheme, candidate_count: int) -> TOCATaskResult:
@@ -467,6 +496,12 @@ def _scale_to_int(value: float, source_low: float, source_high: float, target_lo
     ratio = (value - source_low) / (source_high - source_low)
     scaled = target_low + ratio * (target_high - target_low)
     return min(target_high, max(target_low, int(round(scaled))))
+
+
+def _normalized(value: float, source_low: float, source_high: float) -> float:
+    if source_high <= source_low:
+        return 0.0
+    return min(1.0, max(0.0, (value - source_low) / (source_high - source_low)))
 
 
 def _min_time(tasks: list[Task]) -> float:

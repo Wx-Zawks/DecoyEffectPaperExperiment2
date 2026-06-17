@@ -259,8 +259,8 @@ def paper_mechanism_summary_chart(
         mean_count = float(np.mean(counts)) if counts else 0.0
         axes[0].text(position, rate + 0.03, f"{mean_count:.1f}/{total_tasks}", ha="center", va="bottom", fontsize=8)
 
-    _boxplot_panel(axes[1], mechanisms, bid_samples, "(b) 中标雾节点出价", "雾节点出价")
-    _boxplot_panel(axes[2], mechanisms, price_samples, "(c) 任务成交报酬", "任务成交报酬")
+    _boxplot_panel(axes[1], mechanisms, bid_samples, "(b) 可比执行成本/出价", "可比执行成本/出价")
+    _boxplot_panel(axes[2], mechanisms, price_samples, "(c) 任务支付成本", "任务支付成本")
 
     _caption(fig, caption)
     fig.tight_layout(rect=(0.03, 0.1, 0.99, 0.96))

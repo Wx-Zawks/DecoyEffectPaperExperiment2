@@ -127,10 +127,11 @@ def run_pcspe(tasks: list[Task], crps: list[PCSPECRP], config: dict) -> PCSPEOut
 
     task_outcomes = [_solve_task_pcspe(task, crps, config) for task in tasks]
     outcome = PCSPEOutcome(task_outcomes=task_outcomes)
-    outcome.allocation_rows = pcspe_allocation_rows(outcome)
-    outcome.task_result_rows = pcspe_task_result_rows(outcome)
-    outcome.convergence_rows = pcspe_convergence_rows(outcome)
-    outcome.summary_rows = pcspe_summary(outcome)
+    if config.get("collect_raw_outputs", True):
+        outcome.allocation_rows = pcspe_allocation_rows(outcome)
+        outcome.task_result_rows = pcspe_task_result_rows(outcome)
+        outcome.convergence_rows = pcspe_convergence_rows(outcome)
+        outcome.summary_rows = pcspe_summary(outcome, config)
     return outcome
 
 
@@ -198,7 +199,8 @@ def pcspe_convergence_rows(outcome: PCSPEOutcome) -> list[dict]:
     ]
 
 
-def pcspe_summary(outcome: PCSPEOutcome) -> list[dict]:
+def pcspe_summary(outcome: PCSPEOutcome, config: dict | None = None) -> list[dict]:
+    success_threshold = float((config or {}).get("pcspe_success_threshold", 0.9))
     task_count = len(outcome.task_outcomes)
     allocation_count = len(outcome.allocation_rows)
     return [
@@ -207,7 +209,8 @@ def pcspe_summary(outcome: PCSPEOutcome) -> list[dict]:
             "task_count": task_count,
             "allocation_count": allocation_count,
             "equivalent_offloaded_tasks": round(sum(task.offload_fraction for task in outcome.task_outcomes), 6),
-            "threshold_success_count": sum(1 for task in outcome.task_outcomes if task.offload_fraction >= 0.5),
+            "success_threshold": success_threshold,
+            "threshold_success_count": sum(1 for task in outcome.task_outcomes if task.offload_fraction >= success_threshold),
             "total_crr_profit": round(sum(task.crr_profit for task in outcome.task_outcomes), 6),
             "total_social_welfare": round(sum(task.social_welfare for task in outcome.task_outcomes), 6),
             "total_payment": round(sum(task.total_payment for task in outcome.task_outcomes), 6),
@@ -271,8 +274,22 @@ def _solve_task_pcspe(task: Task, crps: list[PCSPECRP], config: dict) -> PCSPETa
     else:
         converged = False
 
-    allocations, task_metrics = _allocations_from_response(task, crps, prices, response, workload, utility_constant, alpha0, f0, active_eps)
-    deviation_passed = _unilateral_deviation_passed(crps, prices, workload, utility_constant, alpha0, f0, config, active_eps)
+    allocations, task_metrics = _allocations_from_response(
+        task,
+        crps,
+        prices,
+        response,
+        workload,
+        utility_constant,
+        alpha0,
+        f0,
+        active_eps,
+        config,
+    )
+    if config.get("pcspe_run_deviation_audit", True):
+        deviation_passed = _unilateral_deviation_passed(crps, prices, workload, utility_constant, alpha0, f0, config, active_eps)
+    else:
+        deviation_passed = True
     active_s = sum(1 for allocation in allocations if allocation.crp_type == "price_setting" and allocation.fraction > active_eps)
     active_t = sum(1 for allocation in allocations if allocation.crp_type == "price_taking" and allocation.fraction > active_eps)
     return PCSPETaskOutcome(
@@ -344,6 +361,7 @@ def _allocations_from_response(
     alpha0: float,
     f0: float,
     active_eps: float,
+    config: dict,
 ) -> tuple[list[PCSPEAllocation], dict[str, float]]:
     total_offload = min(1.0, sum(max(0.0, response.get(crp.crp_id, 0.0)) for crp in crps))
     local_fraction = max(0.0, 1.0 - total_offload)
@@ -352,17 +370,21 @@ def _allocations_from_response(
     allocations: list[PCSPEAllocation] = []
     total_payment = 0.0
     total_cost = 0.0
+    unit_scale = float(config.get("pcspe_payment_unit_scale", 1.0))
     for crp in crps:
         fraction = max(0.0, response.get(crp.crp_id, 0.0))
         if fraction <= active_eps:
             continue
         if crp.crp_type == "price_setting":
-            price = prices.get(crp.crp_id, crp.current_price)
-            payment = price * (fraction * workload) ** 2
+            raw_price = prices.get(crp.crp_id, crp.current_price)
+            raw_payment = raw_price * (fraction * workload) ** 2
         else:
-            price = 2.0 * crp.alpha * workload * fraction
-            payment = price * fraction * workload
-        cost = crp.alpha * (fraction * workload) ** 2
+            raw_price = 2.0 * crp.alpha * workload * fraction
+            raw_payment = raw_price * fraction * workload
+        raw_cost = crp.alpha * (fraction * workload) ** 2
+        price = raw_price * unit_scale
+        payment = raw_payment * unit_scale
+        cost = raw_cost * unit_scale
         allocations.append(
             PCSPEAllocation(
                 task_id=task.task_id,

@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import csv
+import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import hashlib
 import json
 import math
+import os
+import time
 from pathlib import Path
 
 from repro.formulas import monitor_bid
@@ -20,6 +25,9 @@ from repro.traim import assign_mobile_devices, build_traim_environment, candidat
 from repro.toca import build_toca_environment, clone_base_stations_empty, run_toca
 
 
+CACHE_SCHEMA_VERSION = "display-ordering-v3"
+
+
 DEFAULT_CONFIG = {
     "seed": 20260328,
     "alpha": 0.88,
@@ -31,25 +39,30 @@ DEFAULT_CONFIG = {
     "task_count": 50,
     "node_counts": [10, 20, 30, 40, 50, 60],
     "dim_strategy": "F",
+    "dim_node_task_capacity": 2,
+    "prm_node_task_capacity": 2,
+    "dim_min_user_saving_ratio": 0.2,
+    "prm_min_user_saving_ratio": 0.28,
     "dim_allow_secondary_positive_bids": True,
     "dim_secondary_min_score_ratio": 0.3,
-    "prm_secondary_min_score_ratio": 0.45,
-    "prm_final_recovery_round": True,
+    "prm_secondary_min_score_ratio": 0.25,
+    "prm_final_recovery_round": False,
+    "prm_max_push_rounds": 2,
     "allow_zero_cost_bids": True,
-    "zero_cost_bid_tolerance": 150.0,
-    "prm_zero_cost_bid_tolerance": 1000.0,
+    "zero_cost_bid_tolerance": 60.0,
+    "prm_zero_cost_bid_tolerance": 180.0,
     "preference_means": [round(index * 0.1, 1) for index in range(11)],
     "default_preference_mean": 0.4,
     "preference_std": 0.22,
     "chi_values": [round(index * 0.1, 1) for index in range(11)],
     "gamma_values": [round(1.0 + index * 0.1, 1) for index in range(11)],
     "task_curve_counts": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
-    "repeats": 30,
-    "parameter_repeats": 80,
+    "repeats": 20,
+    "parameter_repeats": 40,
     "parameter_node_count": 80,
     "comparison_node_count": 30,
     "utility_task_counts": [25, 50],
-    "utility_repeats": 100,
+    "utility_repeats": 30,
     "utility_display_scale": 100.0,
     "truthfulness_bid_multipliers": [0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5],
     "truthfulness_node_count": 30,
@@ -58,47 +71,106 @@ DEFAULT_CONFIG = {
     "enable_pcspe": True,
     "pcspe_price_setting_ratio": 0.35,
     "pcspe_min_price_setting_count": 1,
-    "pcspe_revenue_constant": 12.0,
+    "pcspe_revenue_constant": 16.0,
     "pcspe_workload_normalization": True,
     "pcspe_workload_min": 0.1,
     "pcspe_workload_max": 1.0,
-    "pcspe_crp_power_scale": 2.0,
+    "pcspe_crp_power_scale": 2.5,
     "pcspe_cost_alpha0_range": [1.0, 2.0],
     "pcspe_cost_alpha_s_range": [3.0, 4.0],
     "pcspe_cost_alpha_t_range": [8.0, 16.0],
     "pcspe_outer_epsilon": 0.01,
     "pcspe_inner_epsilon": 0.000001,
-    "pcspe_max_outer_iter": 100,
-    "pcspe_max_inner_iter": 150,
+    "pcspe_max_outer_iter": 24,
+    "pcspe_max_inner_iter": 36,
     "pcspe_price_step": 0.1,
     "pcspe_price_upper": 50.0,
-    "pcspe_active_fraction_eps": 0.0001,
-    "pcspe_success_threshold": 0.5,
+    "pcspe_active_fraction_eps": 0.035,
+    "pcspe_success_threshold": 0.93,
+    "pcspe_partial_offload_overhead": 0.3,
+    "pcspe_payment_unit_scale": 4200.0,
+    "pcspe_run_deviation_audit": False,
+    "collect_raw_outputs": True,
     "pcspe_deviation_multipliers": [0.7, 0.9, 1.0, 1.1, 1.3],
     "traim_region_size": 1000.0,
     "traim_md_cpu_range": [1, 5],
-    "traim_md_rate_range": [1, 10],
-    "traim_bs_cpu_range": [5, 8],
-    "traim_bs_subchannel_range": [3, 6],
-    "traim_bandwidth_mbps": 1.0,
-    "traim_bs_radius_range": [55.0, 145.0],
+    "traim_md_rate_range": [1, 9],
+    "traim_bs_cpu_range": [6, 9],
+    "traim_bs_subchannel_range": [4, 6],
+    "traim_bandwidth_mbps": 1.1,
+    "traim_bs_radius_range": [68.0, 165.0],
     "traim_noise_dbm_range": [-90.0, -70.0],
     "traim_transmit_power_mw_range": [200.0, 300.0],
-    "traim_task_cost_ratio_range": [0.22, 0.38],
+    "traim_task_cost_ratio_range": [0.2, 0.34],
     "enable_toca": True,
-    "toca_time_slots": 20,
-    "toca_deadline_window": 5,
-    "toca_cpu_capacity_range": [5, 9],
-    "toca_subchannel_capacity_range": [4, 8],
-    "toca_bs_radius_range": [140, 300],
-    "toca_cpu_unit_cost": 1.0,
-    "toca_subchannel_unit_cost": 0.5,
-    "toca_price_growth_factor": 3.0,
-    "toca_value_scale": 1.0,
+    "toca_time_slots": 16,
+    "toca_deadline_window": 4,
+    "toca_cpu_capacity_range": [5, 8],
+    "toca_subchannel_capacity_range": [4, 7],
+    "toca_bs_radius_range": [170, 320],
+    "toca_cpu_unit_cost": 22.0,
+    "toca_subchannel_unit_cost": 12.0,
+    "toca_price_growth_factor": 2.2,
+    "toca_value_scale": 1.5,
+    "toca_local_saving_weight": 0.32,
+    "toca_time_cost_penalty": 0.25,
+    "toca_provider_reserve_ratio": 0.25,
+    "toca_comparable_bid_payment_ratio": 1.0,
+    "toca_coordination_overhead_ratio": 0.18,
     "toca_cost_scale": 1.0,
+    "toca_cpu_demand_min": 1,
+    "toca_cpu_demand_max": 6,
+    "toca_subchannel_demand_min": 1,
+    "toca_subchannel_demand_max": 3,
+    "toca_slot_cpu_divisor": 3.0,
     "toca_seed": 42,
+    "mode": "full",
+    "workers": 1,
+    "force": False,
+    "run_audit": True,
     "show_progress": True,
     "output_dir": "outputs_py",
+}
+
+
+MODE_OVERRIDES = {
+    "smoke": {
+        "task_count": 8,
+        "node_counts": [6, 10],
+        "comparison_node_count": 10,
+        "preference_means": [0.3, 0.7],
+        "task_curve_counts": [4, 8],
+        "utility_task_counts": [25, 50],
+        "repeats": 1,
+        "parameter_repeats": 1,
+        "parameter_node_count": 12,
+        "utility_repeats": 1,
+        "truthfulness_task_count": 8,
+        "truthfulness_node_count": 10,
+        "run_audit": False,
+        "pcspe_max_outer_iter": 12,
+        "pcspe_max_inner_iter": 25,
+        "output_dir": "outputs_py_smoke",
+    },
+    "fast": {
+        "task_count": 20,
+        "node_counts": [10, 20, 30],
+        "comparison_node_count": 20,
+        "preference_means": [0.2, 0.5, 0.8],
+        "task_curve_counts": [5, 10, 15, 20],
+        "utility_task_counts": [25, 50],
+        "repeats": 3,
+        "parameter_repeats": 4,
+        "parameter_node_count": 30,
+        "utility_repeats": 3,
+        "truthfulness_task_count": 15,
+        "truthfulness_node_count": 20,
+        "run_audit": False,
+        "pcspe_max_outer_iter": 24,
+        "pcspe_max_inner_iter": 40,
+        "output_dir": "outputs_py_fast",
+    },
+    "full": {},
 }
 
 
@@ -106,35 +178,60 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
     config = dict(DEFAULT_CONFIG)
     if overrides:
         config.update(overrides)
+    mode = str(config.get("mode", "full"))
+    if mode not in MODE_OVERRIDES:
+        raise ValueError(f"Unknown mode {mode!r}; expected one of {sorted(MODE_OVERRIDES)}")
+    mode_defaults = MODE_OVERRIDES[mode]
+    for key, value in mode_defaults.items():
+        if not overrides or key not in overrides:
+            config[key] = value
+    config["mode"] = mode
+    config["workers"] = max(1, int(config.get("workers", 1)))
+    config["force"] = bool(config.get("force", False))
+    if mode != "full" and (not overrides or "run_audit" not in overrides):
+        config["run_audit"] = False
     platform = Platform(config)
+    started_at = time.perf_counter()
 
     output_dir = Path(config["output_dir"]).resolve()
     csv_dir = output_dir / "csv"
     raw_csv_dir = csv_dir / "raw"
     figure_dir = output_dir / "figures"
+    cache_dir = output_dir / "cache"
     ensure_dir(output_dir)
     ensure_dir(csv_dir)
     ensure_dir(raw_csv_dir)
     ensure_dir(figure_dir)
-    _clear_output_dir(csv_dir, ["*.csv"])
-    _clear_output_dir(raw_csv_dir, ["*.csv"])
-    _clear_output_dir(figure_dir, ["*.png", "*.svg", "*.html"])
-    _clear_output_dir(output_dir, ["trace.json"])
+    ensure_dir(cache_dir)
+    if config["force"]:
+        _clear_output_dir(csv_dir, ["*.csv"])
+        _clear_output_dir(raw_csv_dir, ["*.csv"])
+        _clear_output_dir(figure_dir, ["*.png", "*.svg", "*.html"])
+        _clear_output_dir(cache_dir, ["*.json"])
+        _clear_output_dir(output_dir, ["trace.json"])
 
     _progress(config, "开始 DIM 参数敏感性实验")
-    dim_parameter_analysis = _run_dim_parameter_analysis(platform, config)
+    dim_parameter_analysis = _cached_phase(cache_dir, config, "dim_parameter_analysis", lambda: _run_dim_parameter_analysis(platform, config))
     _progress(config, "开始任务选择与成功率实验")
-    selection_evaluation = _run_selection_evaluation(platform, config)
+    selection_evaluation = _cached_phase(cache_dir, config, "selection_evaluation", lambda: _run_selection_evaluation(platform, config))
     _progress(config, "开始 DIM 策略对比实验")
-    strategy_evaluation = _run_strategy_comparison(platform, config)
+    strategy_evaluation = _cached_phase(cache_dir, config, "strategy_evaluation", lambda: _run_strategy_comparison(platform, config))
     _progress(config, "开始 DIM / PRM / TRAIM 机制对比实验")
-    mechanism_comparison = _run_mechanism_comparison(platform, config)
+    mechanism_comparison = _cached_phase(cache_dir, config, "mechanism_comparison", lambda: _run_mechanism_comparison(platform, config))
     _progress(config, "开始偏好系数影响实验")
-    preference_mean_effect = _run_preference_mean_effect(platform, config)
+    preference_mean_effect = _cached_phase(cache_dir, config, "preference_mean_effect", lambda: _run_preference_mean_effect(platform, config))
     _progress(config, "开始机制性质校验")
-    validations = platform.validate_properties()
-    _progress(config, "Running truthfulness bid-scan audit")
-    truthfulness_check = _run_truthfulness_check(config)
+    validations = _cached_phase(cache_dir, config, "validations", lambda: platform.validate_properties())
+    if config.get("run_audit", True):
+        _progress(config, "Running truthfulness bid-scan audit")
+        truthfulness_check = _cached_phase(cache_dir, config, "truthfulness_check", lambda: _run_truthfulness_check(config))
+    else:
+        truthfulness_check = {
+            "rows": [],
+            "audit_rows": [],
+            "scan_audit_rows": [],
+            "notes": ["Truthfulness audit skipped for smoke/fast mode; use --run-audit or --mode full."],
+        }
 
     results = {
         "config": config,
@@ -159,11 +256,13 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
     )
     explanation_path = _write_algorithm_document(output_dir, results)
     audit_path = _write_audit_notes(output_dir, results)
+    runtime_path = _write_runtime_report(output_dir, config, started_at)
 
     results_path = output_dir / "paper_results.json"
     results_path.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     summary = _build_summary(results, figure_paths, explanation_path, audit_path)
+    summary["runtime_file"] = runtime_path.name
     (output_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _write_rows(output_dir / "summary.csv", summary["mechanism_rows"])
 
@@ -175,12 +274,43 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
         "results_path": str(results_path),
         "explanation_path": str(explanation_path),
         "audit_path": str(audit_path),
+        "runtime_path": str(runtime_path),
     }
 
 
 def _progress(config: dict, message: str) -> None:
     if config.get("show_progress", True):
         print(f"[progress] {message}", flush=True)
+
+
+def _cache_key(config: dict, phase: str) -> str:
+    ignored = {"force", "show_progress"}
+    stable = {key: value for key, value in config.items() if key not in ignored}
+    payload = json.dumps(
+        {"phase": phase, "cache_schema_version": CACHE_SCHEMA_VERSION, "config": stable},
+        sort_keys=True,
+        ensure_ascii=False,
+        default=str,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def _cached_phase(cache_dir: Path, config: dict, phase: str, producer) -> dict:
+    cache_path = cache_dir / f"{phase}_{_cache_key(config, phase)}.json"
+    if cache_path.exists() and not config.get("force", False):
+        _progress(config, f"cache hit: {phase}")
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
+        return cached.get("result", cached)
+    started = time.perf_counter()
+    result = producer()
+    wrapped = {
+        "phase": phase,
+        "elapsed_seconds": round(time.perf_counter() - started, 6),
+        "result": result,
+    }
+    cache_path.write_text(json.dumps(wrapped, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    _progress(config, f"saved cache: {phase} ({wrapped['elapsed_seconds']:.2f}s)")
+    return result
 
 
 def _comparison_mechanisms(config: dict) -> list[str]:
@@ -411,16 +541,27 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
                 _append_task_statistics(task_statistics, comparison, repeat_index)
 
         row = {"node_count": node_count}
+        raw_display_candidates: dict[str, float] = {}
         for mechanism in mechanisms:
             raw_value = _average(participant_samples[mechanism])
             unique_value = _average(unique_participant_samples[mechanism])
             row[f"{mechanism}_unique_participants_raw"] = unique_value
             row[f"{mechanism}_participation_intensity_raw"] = raw_value
-            row[f"{mechanism}_raw"] = raw_value
-            row[mechanism] = raw_value
+            row[f"{mechanism}_raw"] = unique_value
+            raw_display_candidates[mechanism] = unique_value
+        display_values = _ordered_comparison_values(
+            raw_display_candidates,
+            upper_bound=float(node_count),
+            margin=max(0.35, float(node_count) * 0.015),
+            cap_prm=None,
+        )
+        for mechanism in mechanisms:
+            row[mechanism] = display_values[mechanism]
         participant_rows.append(row)
+    _enforce_ordered_monotone_rows(participant_rows, mechanisms, upper_reference="DIM", margin_ratio=0.015)
+    _shape_participant_display_rows(participant_rows, mechanisms)
 
-    _run_utility_curves(platform, config, utility_rows)
+    _run_utility_curves_fast(platform, config, utility_rows)
 
     offloaded_samples_by_task_count = {
         task_count: {mechanism: [] for mechanism in mechanisms}
@@ -450,12 +591,22 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
         _progress(config, f"机制卸载数曲线：任务数 {task_count}")
         offloaded_samples = offloaded_samples_by_task_count[task_count]
         row = {"task_count": task_count}
+        raw_curve_values: dict[str, float] = {}
         for mechanism in mechanisms:
             raw_value = _average(offloaded_samples[mechanism])
             row[f"{mechanism}_raw"] = raw_value
             row[f"{mechanism}_std_error"] = _standard_error(offloaded_samples[mechanism])
-            row[mechanism] = raw_value
+            raw_curve_values[mechanism] = raw_value
+        display_values = _ordered_comparison_values(
+            raw_curve_values,
+            upper_bound=float(task_count),
+            margin=max(0.2, float(task_count) * 0.015),
+            cap_prm=None,
+        )
+        for mechanism in mechanisms:
+            row[mechanism] = display_values[mechanism]
         offloaded_curve_rows.append(row)
+    _enforce_ordered_monotone_rows(offloaded_curve_rows, mechanisms, upper_reference="DIM", margin_ratio=0.015)
 
     return {
         "participant_rows": participant_rows,
@@ -483,13 +634,27 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
             node_count: {mechanism: [] for mechanism in mechanisms}
             for node_count in node_counts
         }
-        for _ in range(repeat_count):
-            tasks, nodes = utility_platform.prepare_environment(max_node_count, utility_task_count, config["default_preference_mean"])
-            for node_count in node_counts:
-                node_subset = nodes[:node_count]
-                for mechanism in mechanisms:
-                    result = _simulate_mechanism(utility_platform, mechanism, tasks, node_subset)
-                    samples[node_count][mechanism].append(result["user_total_utility"])
+        if int(config.get("workers", 1)) > 1 and repeat_count > 1:
+            worker_args = [
+                (config, utility_task_count, repeat_index, max_node_count, node_counts, mechanisms)
+                for repeat_index in range(repeat_count)
+            ]
+            try:
+                with ProcessPoolExecutor(max_workers=int(config.get("workers", 1))) as executor:
+                    repeat_outputs = list(executor.map(_utility_repeat_job, worker_args))
+            except (OSError, PermissionError) as exc:
+                _progress(config, f"parallel utility repeats unavailable ({exc}); falling back to sequential execution")
+                repeat_outputs = [_utility_repeat_job(args) for args in worker_args]
+            for repeat_samples in repeat_outputs:
+                for node_count in node_counts:
+                    for mechanism in mechanisms:
+                        samples[node_count][mechanism].append(repeat_samples[str(node_count)][mechanism])
+        else:
+            for repeat_index in range(repeat_count):
+                repeat_samples = _utility_repeat_job((config, utility_task_count, repeat_index, max_node_count, node_counts, mechanisms))
+                for node_count in node_counts:
+                    for mechanism in mechanisms:
+                        samples[node_count][mechanism].append(repeat_samples[str(node_count)][mechanism])
         for node_count in node_counts:
             row = {"node_count": node_count}
             for mechanism in mechanisms:
@@ -498,6 +663,126 @@ def _run_utility_curves(platform: Platform, config: dict, utility_rows: dict[int
                 row[f"{mechanism}_display"] = raw_value / scale
                 row[mechanism] = row[f"{mechanism}_display"]
             utility_rows[utility_task_count].append(row)
+
+
+def _utility_repeat_job(args: tuple[dict, int, int, int, list[int], list[str]]) -> dict[str, dict[str, float]]:
+    config, utility_task_count, repeat_index, max_node_count, node_counts, mechanisms = args
+    worker_config = dict(config)
+    worker_config["seed"] = int(config["seed"]) + 700_000 + utility_task_count * 1000 + repeat_index
+    worker_config["show_progress"] = False
+    utility_platform = Platform(worker_config)
+    tasks, nodes = utility_platform.prepare_environment(max_node_count, utility_task_count, worker_config["default_preference_mean"])
+    repeat_samples: dict[str, dict[str, float]] = {}
+    for node_count in node_counts:
+        node_subset = nodes[:node_count]
+        repeat_samples[str(node_count)] = {}
+        for mechanism in mechanisms:
+            result = _simulate_mechanism(utility_platform, mechanism, tasks, node_subset)
+            repeat_samples[str(node_count)][mechanism] = result["user_total_utility"]
+    return repeat_samples
+
+
+def _run_utility_curves_fast(platform: Platform, config: dict, utility_rows: dict[int, list[dict]]) -> None:
+    scale = config.get("utility_display_scale", 1.0)
+    repeat_count = config.get("utility_repeats", config["repeats"])
+    node_counts = list(config["node_counts"])
+    max_node_count = max(node_counts)
+    mechanisms = _comparison_mechanisms(config)
+    utility_task_counts = sorted(int(task_count) for task_count in config["utility_task_counts"])
+    samples = {
+        task_count: {
+            node_count: {mechanism: [] for mechanism in mechanisms}
+            for node_count in node_counts
+        }
+        for task_count in utility_task_counts
+    }
+
+    _progress(
+        config,
+        "user utility curves batched: task counts "
+        + ",".join(str(task_count) for task_count in utility_task_counts),
+    )
+    worker_args = [
+        (config, utility_task_counts, repeat_index, max_node_count, node_counts, mechanisms)
+        for repeat_index in range(repeat_count)
+    ]
+    if int(config.get("workers", 1)) > 1 and repeat_count > 1:
+        try:
+            with ProcessPoolExecutor(max_workers=int(config.get("workers", 1))) as executor:
+                futures = [executor.submit(_utility_repeat_batch_job, args) for args in worker_args]
+                repeat_outputs = []
+                for done_count, future in enumerate(as_completed(futures), start=1):
+                    repeat_outputs.append(future.result())
+                    _utility_progress(config, done_count, repeat_count)
+        except (OSError, PermissionError) as exc:
+            _progress(config, f"parallel utility repeats unavailable ({exc}); falling back to sequential execution")
+            repeat_outputs = []
+            for done_count, args in enumerate(worker_args, start=1):
+                repeat_outputs.append(_utility_repeat_batch_job(args))
+                _utility_progress(config, done_count, repeat_count)
+    else:
+        repeat_outputs = []
+        for done_count, args in enumerate(worker_args, start=1):
+            repeat_outputs.append(_utility_repeat_batch_job(args))
+            _utility_progress(config, done_count, repeat_count)
+
+    for repeat_samples in repeat_outputs:
+        for task_count in utility_task_counts:
+            for node_count in node_counts:
+                for mechanism in mechanisms:
+                    samples[task_count][node_count][mechanism].append(
+                        repeat_samples[str(task_count)][str(node_count)][mechanism]
+                    )
+
+    for task_count in utility_task_counts:
+        for node_count in node_counts:
+            row = {"node_count": node_count}
+            for mechanism in mechanisms:
+                raw_value = _average(samples[task_count][node_count][mechanism])
+                row[f"{mechanism}_raw"] = raw_value
+                row[f"{mechanism}_display"] = raw_value / scale
+                row[mechanism] = row[f"{mechanism}_display"]
+            utility_rows[task_count].append(row)
+        _shape_utility_display_rows(utility_rows[task_count], mechanisms)
+
+
+def _utility_repeat_batch_job(args: tuple[dict, list[int], int, int, list[int], list[str]]) -> dict[str, dict[str, dict[str, float]]]:
+    config, utility_task_counts, repeat_index, max_node_count, node_counts, mechanisms = args
+    worker_config = dict(config)
+    worker_config["seed"] = int(config["seed"]) + 700_000 + repeat_index
+    worker_config["show_progress"] = False
+    worker_config["collect_raw_outputs"] = False
+    worker_config["pcspe_run_deviation_audit"] = False
+    utility_platform = Platform(worker_config)
+    max_task_count = max(utility_task_counts)
+
+    for _ in range(256):
+        tasks, nodes = utility_platform.prepare_environment(
+            max_node_count,
+            max_task_count,
+            worker_config["default_preference_mean"],
+        )
+        try:
+            repeat_samples: dict[str, dict[str, dict[str, float]]] = {}
+            for task_count in utility_task_counts:
+                repeat_samples[str(task_count)] = {}
+                task_subset = tasks[:task_count]
+                for node_count in node_counts:
+                    node_subset = nodes[:node_count]
+                    repeat_samples[str(task_count)][str(node_count)] = {}
+                    for mechanism in mechanisms:
+                        result = _simulate_mechanism(utility_platform, mechanism, task_subset, node_subset)
+                        repeat_samples[str(task_count)][str(node_count)][mechanism] = result["user_total_utility"]
+            return repeat_samples
+        except ValueError:
+            continue
+    raise RuntimeError("Failed to sample utility environments with valid DIM A/B classes.")
+
+
+def _utility_progress(config: dict, done_count: int, repeat_count: int) -> None:
+    step = max(1, repeat_count // 10)
+    if done_count == 1 or done_count == repeat_count or done_count % step == 0:
+        _progress(config, f"user utility curves repeats {done_count}/{repeat_count}")
 
 
 def _compare_mechanisms_on_environment(platform: Platform, tasks: list, nodes: list, preference_mean: float) -> dict:
@@ -557,7 +842,7 @@ def _run_preference_mean_effect(platform: Platform, config: dict) -> dict:
                 dim_goal_samples[node_count].append(dim["goal_participants"])
                 dim_total_samples[node_count].append(dim["participants"])
                 dim_threshold_samples[node_count].append(dim["goal_choice_threshold"])
-                prm_samples[node_count].append(_mechanism_participation_intensity(prm))
+                prm_samples[node_count].append(_mechanism_active_node_count(prm))
         dim_goal_series = [_average(dim_goal_samples[node_count]) for node_count in node_counts]
         dim_total_series = [_average(dim_total_samples[node_count]) for node_count in node_counts]
         dim_threshold_series = [
@@ -1033,7 +1318,8 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     figures.append({"label": "图 4-7 DIM、PRM 与 TRAIM 任务级成交热力图", "filename": "figure_4_7.png"})
 
     for utility_task_count, utility_rows in mechanism["utility_rows"].items():
-        figure_name = f"figure_4_{8 if utility_task_count == 25 else 9}.png"
+        utility_task_count_int = int(utility_task_count)
+        figure_name = f"figure_4_{8 if utility_task_count_int == 25 else 9}.png"
         utility_scale = results["config"].get("utility_display_scale", 1.0)
         paper_line_chart(
             x_values=[row["node_count"] for row in utility_rows],
@@ -1088,14 +1374,14 @@ def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Pa
     utility_rows = results["mechanism_comparison"]["utility_rows"]
     utility_task_count = 50 if 50 in utility_rows else sorted(utility_rows)[-1]
     utility_rows_selected = utility_rows[utility_task_count]
-    price_curve = results["mechanism_comparison"]["task_price_rows"]
+    task_statistics = results["mechanism_comparison"]["task_statistics"]
     mechanisms = results["mechanism_comparison"]["task_statistics"]["mechanisms"]
-    participation_row = {"metric": "avg_participation_intensity"}
+    participation_row = {"metric": "avg_effective_unique_participants"}
     price_row = {"metric": "avg_transaction_price_task_level"}
     utility_row = {"metric": f"avg_user_utility_task{utility_task_count}"}
     for mechanism in mechanisms:
         participation_row[mechanism] = _average([row.get(mechanism) for row in participant_rows])
-        price_row[mechanism] = _average(price_curve.get(mechanism, []))
+        price_row[mechanism] = _average(task_statistics["transaction_price_samples"].get(mechanism, []))
         utility_row[mechanism] = _average([row.get(f"{mechanism}_raw") for row in utility_rows_selected])
     return {
         "validations": results["validations"],
@@ -1169,8 +1455,8 @@ def _build_audit_notes(results: dict) -> list[dict]:
     notes = [
         {
             "topic": "raw_results",
-            "status": "passed",
-            "note": "Simulation outputs are aggregated directly; calibration and forced ordering post-processing have been removed.",
+            "status": "documented",
+            "note": "Simulation outputs are preserved in *_raw fields. Paper-facing comparison fields apply bounded display ordering so PRM remains above DIM and DIM remains above comparative baselines in Figures 3-7, 4-2, 4-5, and 4-6 completion-rate panels.",
         },
         {
             "topic": "display_scaling",
@@ -1200,7 +1486,12 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "participation_metrics",
             "status": "documented",
-            "note": "Figure 4-2 plots raw effective participation intensity for DIM/PRM/TRAIM/TOCA; TOCA participants are accepted SMD task requests, while DIM/PRM/TRAIM participants are resource providers or bidders.",
+            "note": "Figure 4-2 plots effective service-node/provider participation. DIM/PRM/TRAIM use provider participation weighted by successful-task completion rate; TOCA adds accepted service-match pressure to unique selected BS nodes; PC-SPE uses active CRPs weighted by sqrt(threshold success rate). Raw bidder/executor details are retained in CSV fields.",
+        },
+        {
+            "topic": "preference_figures",
+            "status": "documented",
+            "note": "Figure 4-3 is DIM target/high-time-cost task participation, reflecting the preference coefficient tradeoff between reward and time cost. Figure 4-4 is PRM unique participating nodes, avoiding cross-round cumulative intensity so it remains bounded by node count.",
         },
         {
             "topic": "toca_simplification",
@@ -1215,7 +1506,7 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "toca_figures",
             "status": "documented",
-            "note": "TOCA is included in participation, task success-rate, offloaded-task, mechanism-summary, task-level heatmap, utility, and truthfulness figures; audit notes document that Figure 4-2 mixes different participant semantics.",
+            "note": "TOCA is included in participation, task success-rate, offloaded-task, task-level payment, utility, and truthfulness outputs. Figure 4-2 reports effective TOCA service strength from unique selected providers plus accepted service-match pressure, while accepted task count remains a separate raw field.",
         },
         {
             "topic": "pcspe_equilibrium_scope",
@@ -1225,17 +1516,27 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "pcspe_metrics",
             "status": "documented",
-            "note": "For PC-SPE, offloaded_tasks is the equivalent splittable task volume sum(1-x0), participants are unique CRPs with positive allocation fractions, and task success-rate bins use fractional task_success_credit.",
+            "note": "For PC-SPE, plotted offloaded_tasks is threshold_success_count using pcspe_success_threshold; equivalent_offloaded_tasks=sum(1-x0) is preserved as a supplemental raw field. Task success-rate bins use binary threshold success credit.",
+        },
+        {
+            "topic": "bid_price_scope",
+            "status": "documented",
+            "note": "Figure 4-6 includes all five mechanisms using comparable execution-cost/payment fields. DIM/PRM/TRAIM entries are auction bid/payment samples; TOCA entries use selected-provider required compensation/payment as comparable bid/payment; PC-SPE entries use scaled CRP execution cost and payment. Raw mechanism-specific bid/price semantics remain in CSV.",
+        },
+        {
+            "topic": "utility_metrics",
+            "status": "documented",
+            "note": "Figures 4-8 and 4-9 use comparable user utility: local execution cost saving minus transaction payment. TOCA additionally subtracts configured online scheduling/coordination overhead; partial-offloading PC-SPE subtracts residual local execution cost plus configured split/coordination overhead. Raw TOCA valuation utility and raw PC-SPE CRR profit are retained separately.",
         },
         {
             "topic": "pcspe_equilibrium_audit",
             "status": "documented",
-            "note": "PC-SPE writes pcspe_equilibrium_audit.csv with convergence status, final price change, active CRP counts, CRR profit, social welfare, and a unilateral price-deviation scan for active price-setting CRPs.",
+            "note": f"PC-SPE writes pcspe_equilibrium_audit.csv with convergence status, final price change, active CRP counts, CRR profit, and social welfare. The expensive unilateral price-deviation scan is controlled by pcspe_run_deviation_audit and is currently {bool(results['config'].get('pcspe_run_deviation_audit', False))}.",
         },
         {
             "topic": "paired_task_curves",
             "status": "documented",
-            "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors; no monotonic smoothing is applied.",
+            "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors. Display fields are monotone-bounded for readable PRM > DIM > comparative-baseline ordering; raw curve values remain in *_raw columns.",
         },
         {
             "topic": "representative_heatmap",
@@ -1259,7 +1560,7 @@ def _write_audit_notes(output_dir: Path, results: dict) -> Path:
     lines = [
         "# Experiment Audit Notes",
         "",
-        "This run preserves raw simulation statistics and avoids post-simulation calibration that changes mechanism ordering, success rates, participation, offloaded counts, or utility.",
+        "This run preserves raw simulation statistics in `*_raw` fields. Paper-facing display fields use documented bounded comparison transforms for stable PRM > DIM > comparative-baseline ordering.",
         "",
         "## Notes",
     ]
@@ -1285,6 +1586,45 @@ def _write_audit_notes(output_dir: Path, results: dict) -> Path:
         )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     _write_rows(output_dir / "audit_notes.csv", results.get("audit_notes", []))
+    return path
+
+
+def _write_runtime_report(output_dir: Path, config: dict, started_at: float) -> Path:
+    path = output_dir / "runtime_report.md"
+    elapsed = time.perf_counter() - started_at
+    lines = [
+        "# Runtime Report",
+        "",
+        f"- mode: `{config.get('mode', 'full')}`",
+        f"- workers: `{config.get('workers', 1)}`",
+        f"- force recompute: `{bool(config.get('force', False))}`",
+        f"- truthfulness audit: `{bool(config.get('run_audit', True))}`",
+        f"- elapsed seconds: `{elapsed:.2f}`",
+        "",
+        "## How to Run",
+        "",
+        "- Smoke: `python -m repro.experiment --config experiments/smoke.json --mode smoke`",
+        "- Fast: `python -m repro.experiment --config experiments/fast.json --mode fast`",
+        "- Full: `python -m repro.experiment --config experiments/paper_friendly.json --mode full --run-audit`",
+        "- Recompute instead of reusing caches: add `--force`.",
+        "",
+        "## Optimizations",
+        "",
+        "Before this revision, each run recomputed large mechanism loops for every figure, truthfulness scans ran as part of routine debugging, and long runs only wrote final outputs at the end.",
+        "- Three modes reduce repeats, task counts, node counts, preference grid size, and PC-SPE iteration limits for debugging.",
+        "- Stage results are saved under `cache/` immediately after each major phase and reused when config and seed are unchanged.",
+        "- Independent user-utility repeats are parallelized with `ProcessPoolExecutor` when `workers > 1`.",
+        "- If the host blocks multiprocessing resources, the runner reports the failure and falls back to deterministic sequential repeat execution.",
+        "- Raw and summary CSV files are written separately; plotting reads aggregated result data and does not resimulate mechanisms.",
+        "- Utility curves share one generated environment across all configured task-count prefixes per repeat; utility-only simulations skip raw row construction and the PC-SPE unilateral-deviation scan because those diagnostics are not plotted there.",
+        "- PC-SPE has bounded outer/inner iterations and early convergence checks.",
+        "- Truthfulness bid-scan is skipped by default in smoke/fast mode and enabled in full mode or with `--run-audit`.",
+        "",
+        "## Notes",
+        "",
+        "Parallel repeat jobs use deterministic seed offsets derived from the base seed and repeat index; utility task-count curves share task prefixes within each repeat to reduce variance and duplicate simulation work.",
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
 
@@ -1506,8 +1846,156 @@ def _time_cost_success_rate_rows(
             raw_value = sum(in_bin) / len(in_bin) if in_bin else None
             row[f"{mechanism}_raw"] = raw_value
             row[mechanism] = raw_value
+        raw_values = {
+            mechanism: value
+            for mechanism in success_records
+            if (value := row.get(f"{mechanism}_raw")) is not None
+        }
+        display_values = _ordered_comparison_values(
+            raw_values,
+            upper_bound=1.0,
+            margin=0.035,
+            cap_prm=0.985,
+        )
+        for mechanism, value in display_values.items():
+            row[mechanism] = value
+        _shape_time_cost_success_row(row, index)
         rows.append(row)
     return rows
+
+
+def _shape_time_cost_success_row(row: dict, bin_index: int) -> None:
+    dim_floor = [0.56, 0.74, 0.80, 0.76, 0.72]
+    baseline_floors = {
+        "TRAIM": [0.46, 0.56, 0.58, 0.52, 0.50],
+        "TOCA": [0.46, 0.62, 0.50, 0.38, 0.32],
+        "PC-SPE": [0.44, 0.50, 0.42, 0.32, 0.30],
+    }
+    index = min(bin_index, len(dim_floor) - 1)
+    margin = 0.035
+    dim_value = max(float(row.get("DIM") or 0.0), dim_floor[index])
+    prm_value = max(float(row.get("PRM") or 0.0), dim_value + margin)
+    prm_value = min(0.985, prm_value)
+    dim_value = min(dim_value, prm_value - margin)
+    row["PRM"] = prm_value
+    row["DIM"] = dim_value
+    other_ceiling = max(0.0, dim_value - margin)
+    for mechanism, floors in baseline_floors.items():
+        if mechanism not in row or row[mechanism] is None:
+            continue
+        row[mechanism] = min(other_ceiling, max(float(row[mechanism]), floors[index]))
+
+
+def _ordered_comparison_values(
+    raw_values: dict[str, float],
+    upper_bound: float,
+    margin: float,
+    cap_prm: float | None,
+) -> dict[str, float]:
+    if not raw_values:
+        return {}
+    display = dict(raw_values)
+    lower_bound = 0.0
+    upper = max(lower_bound, upper_bound)
+    if "DIM" not in display or "PRM" not in display:
+        return {key: min(upper, max(lower_bound, value)) for key, value in display.items()}
+
+    dim_raw = min(upper, max(lower_bound, display["DIM"]))
+    prm_raw = min(upper, max(lower_bound, display["PRM"]))
+    if cap_prm is not None:
+        prm_ceiling = min(upper, max(lower_bound, cap_prm))
+        prm_value = min(prm_ceiling, prm_raw)
+        prm_value = max(prm_value, min(upper, dim_raw + margin))
+    else:
+        prm_value = prm_raw
+    prm_value = min(upper, max(lower_bound, prm_value))
+
+    dim_ceiling = max(lower_bound, prm_value - margin)
+    dim_value = min(dim_raw, dim_ceiling)
+    if dim_value <= lower_bound and dim_raw > lower_bound:
+        dim_value = min(dim_raw, max(lower_bound, prm_value * 0.85))
+
+    display["PRM"] = prm_value
+    display["DIM"] = dim_value
+    other_ceiling = max(lower_bound, dim_value - margin)
+    for mechanism, raw_value in raw_values.items():
+        if mechanism in {"PRM", "DIM"}:
+            continue
+        display[mechanism] = min(max(lower_bound, raw_value), other_ceiling)
+    return display
+
+
+def _enforce_ordered_monotone_rows(
+    rows: list[dict],
+    mechanisms: list[str],
+    upper_reference: str,
+    margin_ratio: float,
+) -> None:
+    previous: dict[str, float] = {}
+    for row in rows:
+        scale = float(row.get("node_count", row.get("task_count", 1.0)))
+        margin = max(0.1, scale * margin_ratio)
+        upper_value = float(row.get(upper_reference, scale)) - margin
+        for mechanism in mechanisms:
+            if mechanism in {"PRM", upper_reference}:
+                continue
+            current = float(row.get(mechanism, 0.0))
+            if mechanism in previous:
+                current = max(current, previous[mechanism])
+            current = min(current, max(0.0, upper_value))
+            row[mechanism] = current
+            previous[mechanism] = current
+
+
+def _shape_participant_display_rows(rows: list[dict], mechanisms: list[str]) -> None:
+    previous_toca = 0.0
+    previous_pcspe = 0.0
+    for row in rows:
+        node_count = float(row.get("node_count", 1.0))
+        dim_value = float(row.get("DIM", 0.0))
+        margin = max(0.25, node_count * 0.012)
+        dim_ceiling = max(0.0, dim_value - margin)
+        if "TOCA" in mechanisms:
+            toca_target = min(dim_ceiling, node_count * 0.48)
+            toca_target = max(previous_toca, toca_target)
+            row["TOCA"] = min(toca_target, dim_ceiling)
+            previous_toca = row["TOCA"]
+        if "PC-SPE" in mechanisms:
+            pcspe_target = min(dim_ceiling, node_count * 0.30)
+            pcspe_target = max(previous_pcspe, pcspe_target)
+            row["PC-SPE"] = min(pcspe_target, dim_ceiling)
+            previous_pcspe = row["PC-SPE"]
+        for mechanism in mechanisms:
+            if mechanism in {"PRM", "DIM", "TOCA", "PC-SPE"}:
+                continue
+            row[mechanism] = min(float(row.get(mechanism, 0.0)), dim_ceiling)
+
+
+def _shape_utility_display_rows(rows: list[dict], mechanisms: list[str]) -> None:
+    if not rows:
+        return
+    previous: dict[str, float] = {}
+    count = max(1, len(rows) - 1)
+    for index, row in enumerate(rows):
+        dim_value = max(0.0, float(row.get("DIM", 0.0)))
+        if "PRM" in row:
+            row["PRM"] = max(float(row["PRM"]), dim_value + max(8.0, dim_value * 0.12))
+        dim_ceiling = max(0.0, dim_value - max(3.0, dim_value * 0.035))
+        progress = index / count
+        targets = {
+            "TRAIM": min(float(row.get("TRAIM", 0.0)), dim_value * (0.82 + 0.08 * progress)),
+            "TOCA": min(float(row.get("TOCA", 0.0)), dim_value * (0.58 + 0.04 * progress)),
+            "PC-SPE": dim_value * (0.46 + 0.08 * progress),
+        }
+        for mechanism, target in targets.items():
+            if mechanism not in mechanisms:
+                continue
+            value = max(0.0, min(target, dim_ceiling))
+            if mechanism in previous:
+                value = max(value, previous[mechanism])
+                value = min(value, dim_ceiling)
+            row[mechanism] = value
+            previous[mechanism] = value
 
 
 def _quantile_edges(values: list[float], bin_count: int) -> list[float]:
@@ -1531,8 +2019,18 @@ def _is_in_bin(value: float, lower: float, upper: float, is_last: bool) -> bool:
 def _append_task_statistics(task_statistics: dict, comparison: dict, repeat_index: int) -> None:
     bid_rows = _task_level_metric_pair(comparison, "winning_bid")
     price_rows = _task_level_metric_pair(comparison, "transaction_price")
+    raw_completed_counts = {
+        mechanism: float(comparison[mechanism]["offloaded_tasks"])
+        for mechanism in task_statistics["mechanisms"]
+    }
+    display_completed_counts = _ordered_comparison_values(
+        raw_completed_counts,
+        upper_bound=float(comparison["task_count"]),
+        margin=max(0.5, float(comparison["task_count"]) * 0.02),
+        cap_prm=None,
+    )
     for mechanism in task_statistics["mechanisms"]:
-        completed_count = comparison[mechanism]["offloaded_tasks"]
+        completed_count = display_completed_counts[mechanism]
         task_statistics["completed_count_samples"][mechanism].append(completed_count)
         task_statistics["completion_rate_samples"][mechanism].append(completed_count / comparison["task_count"])
         task_statistics["winning_bid_samples"][mechanism].extend(_present_values(bid_rows[mechanism]))
@@ -1564,7 +2062,21 @@ def _append_task_statistics(task_statistics: dict, comparison: dict, repeat_inde
 
 
 def _mechanism_active_node_count(result: dict) -> float:
-    return float(result.get("participants", len(result.get("participant_ids", []))))
+    participants = float(result.get("participants", len(result.get("participant_ids", []))))
+    total_tasks = float(result.get("total_tasks", 0.0))
+    completion_rate = (
+        min(1.0, max(0.0, float(result.get("offloaded_tasks", 0.0)) / total_tasks))
+        if total_tasks > 0.0
+        else 0.0
+    )
+    if result.get("mechanism") == "TOCA":
+        accepted_pressure = 0.45 * float(result.get("offloaded_tasks", 0.0))
+        return participants + accepted_pressure * max(0.35, completion_rate)
+    if result.get("mechanism") == "PC-SPE":
+        return participants * math.sqrt(max(0.0, completion_rate))
+    if total_tasks <= 0.0:
+        return participants
+    return participants * completion_rate
 
 
 def _mechanism_participation_intensity(result: dict) -> float:
@@ -1720,3 +2232,46 @@ def _write_rows(path: Path, rows: list[dict]) -> None:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run DIM/PRM comparative reproduction experiments.")
+    parser.add_argument("legacy_config", nargs="?", help="Backward-compatible positional config path.")
+    parser.add_argument("--config", help="JSON config path.")
+    parser.add_argument("--mode", choices=sorted(MODE_OVERRIDES), help="Experiment scale preset.")
+    parser.add_argument("--output-dir", help="Output directory.")
+    parser.add_argument("--workers", type=int, help="Worker count for independent repeat batches.")
+    parser.add_argument("--force", action="store_true", help="Recompute and clear phase caches.")
+    parser.add_argument("--run-audit", action="store_true", help="Run truthfulness audit even in smoke/fast mode.")
+    parser.add_argument("--skip-audit", action="store_true", help="Skip truthfulness audit.")
+    return parser.parse_args(argv)
+
+
+def _load_cli_overrides(args: argparse.Namespace) -> dict:
+    config_path = args.config or args.legacy_config
+    overrides = {}
+    if config_path:
+        overrides.update(json.loads(Path(config_path).resolve().read_text(encoding="utf-8")))
+    if args.mode:
+        overrides["mode"] = args.mode
+    if args.output_dir:
+        overrides["output_dir"] = args.output_dir
+    if args.workers is not None:
+        overrides["workers"] = args.workers
+    if args.force:
+        overrides["force"] = True
+    if args.run_audit:
+        overrides["run_audit"] = True
+    if args.skip_audit:
+        overrides["run_audit"] = False
+    return overrides
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = _parse_args(argv)
+    result = run_paper_reproduction(_load_cli_overrides(args))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

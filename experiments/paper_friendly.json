@@ -1,5 +1,6 @@
 {
   "preset": "paper_friendly",
+  "mode": "full",
   "seed": 20260328,
   "task_count": 50,
   "node_counts": [10, 20, 30, 40, 50, 60],
@@ -9,9 +10,11 @@
   "preference_std": 0.08,
   "reward_range": [3.0, 22.0],
   "time_cost_range": [250.0, 2200.0],
-  "repeats": 30,
-  "parameter_repeats": 100,
-  "utility_repeats": 100,
+  "repeats": 20,
+  "parameter_repeats": 40,
+  "utility_repeats": 30,
   "utility_display_scale": 100.0,
-  "output_dir": "outputs_py_paper_friendly"
+  "output_dir": "outputs_py_paper_friendly",
+  "workers": 2,
+  "run_audit": true
 }
