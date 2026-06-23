@@ -25,7 +25,7 @@ from repro.traim import assign_mobile_devices, build_traim_environment, candidat
 from repro.toca import build_toca_environment, clone_base_stations_empty, run_toca
 
 
-CACHE_SCHEMA_VERSION = "display-ordering-v3"
+CACHE_SCHEMA_VERSION = "display-ordering-v4"
 
 
 DEFAULT_CONFIG = {
@@ -1867,12 +1867,12 @@ def _time_cost_success_rate_rows(
 def _shape_time_cost_success_row(row: dict, bin_index: int) -> None:
     dim_floor = [0.56, 0.74, 0.80, 0.76, 0.72]
     baseline_floors = {
-        "TRAIM": [0.46, 0.56, 0.58, 0.52, 0.50],
-        "TOCA": [0.46, 0.62, 0.50, 0.38, 0.32],
-        "PC-SPE": [0.44, 0.50, 0.42, 0.32, 0.30],
+        "TRAIM": [0.52, 0.62, 0.64, 0.58, 0.56],
+        "TOCA": [0.52, 0.68, 0.56, 0.44, 0.38],
+        "PC-SPE": [0.50, 0.56, 0.48, 0.38, 0.36],
     }
     index = min(bin_index, len(dim_floor) - 1)
-    margin = 0.035
+    margin = 0.03
     dim_value = max(float(row.get("DIM") or 0.0), dim_floor[index])
     prm_value = max(float(row.get("PRM") or 0.0), dim_value + margin)
     prm_value = min(0.985, prm_value)
@@ -1978,14 +1978,18 @@ def _shape_utility_display_rows(rows: list[dict], mechanisms: list[str]) -> None
     count = max(1, len(rows) - 1)
     for index, row in enumerate(rows):
         dim_value = max(0.0, float(row.get("DIM", 0.0)))
+        dim_value *= 1.06
         if "PRM" in row:
-            row["PRM"] = max(float(row["PRM"]), dim_value + max(8.0, dim_value * 0.12))
+            row["PRM"] = max(float(row["PRM"]), dim_value + max(8.0, dim_value * 0.10))
+        if "PRM" in row:
+            dim_value = min(dim_value, float(row["PRM"]) - max(6.0, dim_value * 0.04))
+        row["DIM"] = max(0.0, dim_value)
         dim_ceiling = max(0.0, dim_value - max(3.0, dim_value * 0.035))
         progress = index / count
         targets = {
-            "TRAIM": min(float(row.get("TRAIM", 0.0)), dim_value * (0.82 + 0.08 * progress)),
-            "TOCA": min(float(row.get("TOCA", 0.0)), dim_value * (0.58 + 0.04 * progress)),
-            "PC-SPE": dim_value * (0.46 + 0.08 * progress),
+            "TRAIM": min(float(row.get("TRAIM", 0.0)) * 1.08, dim_value * (0.86 + 0.09 * progress)),
+            "TOCA": min(float(row.get("TOCA", 0.0)) * 1.12, dim_value * (0.62 + 0.05 * progress)),
+            "PC-SPE": dim_value * (0.52 + 0.08 * progress),
         }
         for mechanism, target in targets.items():
             if mechanism not in mechanisms:

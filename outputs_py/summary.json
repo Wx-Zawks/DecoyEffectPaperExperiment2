@@ -7,7 +7,7 @@
     },
     "computational_efficiency": {
       "claimed_complexity": "O(IJlogJ)",
-      "validation_runtime_ms": 6.7168
+      "validation_runtime_ms": 6.7329
     },
     "minimum_node_utility": 0.0
   },
