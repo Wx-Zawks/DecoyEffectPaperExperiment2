@@ -1,2 +1,2 @@
 mechanism,accepted_task_count,rejected_task_count,accepted_goal_task_count,total_goal_task_count,total_payment,total_operational_cost,user_total_utility,social_welfare,resource_utilization,individual_rationality
-TOCA,30,20,5,15,6557.090368,2849.218091,1059.922499,4767.794776,0.038101,True
+TOCA,33,17,6,15,7278.296771,3201.905823,1128.562121,5204.953069,0.032373,True

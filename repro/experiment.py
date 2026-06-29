@@ -25,7 +25,7 @@ from repro.traim import assign_mobile_devices, build_traim_environment, candidat
 from repro.toca import build_toca_environment, clone_base_stations_empty, run_toca
 
 
-CACHE_SCHEMA_VERSION = "display-ordering-v4"
+CACHE_SCHEMA_VERSION = "mechanism-raw-completion-v1"
 
 
 DEFAULT_CONFIG = {
@@ -63,7 +63,7 @@ DEFAULT_CONFIG = {
     "comparison_node_count": 30,
     "utility_task_counts": [25, 50],
     "utility_repeats": 30,
-    "utility_display_scale": 100.0,
+    "utility_display_scale": 1.0,
     "truthfulness_bid_multipliers": [0.5, 0.7, 0.9, 1.0, 1.1, 1.3, 1.5],
     "truthfulness_node_count": 30,
     "truthfulness_task_count": 30,
@@ -86,28 +86,29 @@ DEFAULT_CONFIG = {
     "pcspe_price_step": 0.1,
     "pcspe_price_upper": 50.0,
     "pcspe_active_fraction_eps": 0.035,
-    "pcspe_success_threshold": 0.93,
+    "pcspe_success_threshold": 0.90,
     "pcspe_partial_offload_overhead": 0.3,
     "pcspe_payment_unit_scale": 4200.0,
     "pcspe_run_deviation_audit": False,
     "collect_raw_outputs": True,
+    "formal_raw_only": True,
     "pcspe_deviation_multipliers": [0.7, 0.9, 1.0, 1.1, 1.3],
     "traim_region_size": 1000.0,
     "traim_md_cpu_range": [1, 5],
     "traim_md_rate_range": [1, 9],
     "traim_bs_cpu_range": [6, 9],
-    "traim_bs_subchannel_range": [4, 6],
-    "traim_bandwidth_mbps": 1.1,
-    "traim_bs_radius_range": [68.0, 165.0],
+    "traim_bs_subchannel_range": [5, 7],
+    "traim_bandwidth_mbps": 1.2,
+    "traim_bs_radius_range": [75.0, 180.0],
     "traim_noise_dbm_range": [-90.0, -70.0],
     "traim_transmit_power_mw_range": [200.0, 300.0],
     "traim_task_cost_ratio_range": [0.2, 0.34],
     "enable_toca": True,
-    "toca_time_slots": 16,
-    "toca_deadline_window": 4,
-    "toca_cpu_capacity_range": [5, 8],
-    "toca_subchannel_capacity_range": [4, 7],
-    "toca_bs_radius_range": [170, 320],
+    "toca_time_slots": 18,
+    "toca_deadline_window": 5,
+    "toca_cpu_capacity_range": [6, 9],
+    "toca_subchannel_capacity_range": [5, 8],
+    "toca_bs_radius_range": [185, 340],
     "toca_cpu_unit_cost": 22.0,
     "toca_subchannel_unit_cost": 12.0,
     "toca_price_growth_factor": 2.2,
@@ -243,6 +244,7 @@ def run_paper_reproduction(overrides: dict | None = None) -> dict:
         "validations": validations,
         "truthfulness_check": truthfulness_check,
     }
+    results["ordering_audit"] = _build_ordering_audit(results)
     results["audit_notes"] = _build_audit_notes(results)
 
     _progress(config, "写出 CSV、图表与汇总文件")
@@ -524,11 +526,13 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
         _progress(config, f"机制参与数对比：节点数 {node_count}")
         participant_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
         unique_participant_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
+        reported_participant_samples: dict[str, list[float]] = {mechanism: [] for mechanism in mechanisms}
         for repeat_index in range(config["repeats"]):
             comparison = platform.compare_mechanisms(node_count, config["task_count"], config["default_preference_mean"])
             for mechanism in mechanisms:
                 participant_samples[mechanism].append(_mechanism_participation_intensity(comparison[mechanism]))
                 unique_participant_samples[mechanism].append(_mechanism_active_node_count(comparison[mechanism]))
+                reported_participant_samples[mechanism].append(float(comparison[mechanism].get("participants", 0.0)))
 
             if node_count == config["comparison_node_count"]:
                 if not representative_selected:
@@ -541,25 +545,17 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
                 _append_task_statistics(task_statistics, comparison, repeat_index)
 
         row = {"node_count": node_count}
-        raw_display_candidates: dict[str, float] = {}
         for mechanism in mechanisms:
             raw_value = _average(participant_samples[mechanism])
             unique_value = _average(unique_participant_samples[mechanism])
+            reported_value = _average(reported_participant_samples[mechanism])
             row[f"{mechanism}_unique_participants_raw"] = unique_value
             row[f"{mechanism}_participation_intensity_raw"] = raw_value
-            row[f"{mechanism}_raw"] = unique_value
-            raw_display_candidates[mechanism] = unique_value
-        display_values = _ordered_comparison_values(
-            raw_display_candidates,
-            upper_bound=float(node_count),
-            margin=max(0.35, float(node_count) * 0.015),
-            cap_prm=None,
-        )
+            row[f"{mechanism}_reported_participants_raw"] = reported_value
+            row[f"{mechanism}_raw"] = raw_value
         for mechanism in mechanisms:
-            row[mechanism] = display_values[mechanism]
+            row[mechanism] = row[f"{mechanism}_raw"]
         participant_rows.append(row)
-    _enforce_ordered_monotone_rows(participant_rows, mechanisms, upper_reference="DIM", margin_ratio=0.015)
-    _shape_participant_display_rows(participant_rows, mechanisms)
 
     _run_utility_curves_fast(platform, config, utility_rows)
 
@@ -591,22 +587,13 @@ def _run_mechanism_comparison(platform: Platform, config: dict) -> dict:
         _progress(config, f"机制卸载数曲线：任务数 {task_count}")
         offloaded_samples = offloaded_samples_by_task_count[task_count]
         row = {"task_count": task_count}
-        raw_curve_values: dict[str, float] = {}
         for mechanism in mechanisms:
             raw_value = _average(offloaded_samples[mechanism])
             row[f"{mechanism}_raw"] = raw_value
             row[f"{mechanism}_std_error"] = _standard_error(offloaded_samples[mechanism])
-            raw_curve_values[mechanism] = raw_value
-        display_values = _ordered_comparison_values(
-            raw_curve_values,
-            upper_bound=float(task_count),
-            margin=max(0.2, float(task_count) * 0.015),
-            cap_prm=None,
-        )
         for mechanism in mechanisms:
-            row[mechanism] = display_values[mechanism]
+            row[mechanism] = row[f"{mechanism}_raw"]
         offloaded_curve_rows.append(row)
-    _enforce_ordered_monotone_rows(offloaded_curve_rows, mechanisms, upper_reference="DIM", margin_ratio=0.015)
 
     return {
         "participant_rows": participant_rows,
@@ -743,8 +730,6 @@ def _run_utility_curves_fast(platform: Platform, config: dict, utility_rows: dic
                 row[f"{mechanism}_display"] = raw_value / scale
                 row[mechanism] = row[f"{mechanism}_display"]
             utility_rows[task_count].append(row)
-        _shape_utility_display_rows(utility_rows[task_count], mechanisms)
-
 
 def _utility_repeat_batch_job(args: tuple[dict, list[int], int, int, list[int], list[str]]) -> dict[str, dict[str, dict[str, float]]]:
     config, utility_task_counts, repeat_index, max_node_count, node_counts, mechanisms = args
@@ -1210,12 +1195,12 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
             ("after-compete", [row["after_compete"] for row in selection_rows]),
             ("after-goal", [row["after_goal"] for row in selection_rows]),
         ],
-        x_label="环境中雾节点数",
-        y_label="参与强度",
-        caption="图 3-6 加入机制前后任务参与强度比较",
+        x_label="边缘节点数",
+        y_label="参与数",
+        caption="图 3-6 加入机制前后任务参与数比较",
         output_path=figure_dir / "figure_3_6.png",
     )
-    figures.append({"label": "图 3-6 加入机制前后任务参与强度比较", "filename": "figure_3_6.png"})
+    figures.append({"label": "图 3-6 加入机制前后任务参与数比较", "filename": "figure_3_6.png"})
 
     success_rows = results["selection_evaluation"]["time_cost_success_rates"]
     bin_labels = [row["bin_label"] for row in success_rows]
@@ -1240,7 +1225,7 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
             ("F策略", [row["F"] for row in strategy_rows]),
             ("RF策略", [row["RF"] for row in strategy_rows]),
         ],
-        x_label="雾节点数",
+        x_label="边缘节点数",
         y_label="参与节点个数",
         caption="图 3-8 诱饵效应不同策略的比较",
         output_path=figure_dir / "figure_3_8.png",
@@ -1252,18 +1237,18 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     paper_line_chart(
         x_values=[row["node_count"] for row in participant_rows],
         series=[(mechanism, [row.get(mechanism) for row in participant_rows]) for mechanism in comparison_mechanisms],
-        x_label="雾节点数",
-        y_label="有效参与强度",
-        caption="图 4-2 DIM、PRM、TRAIM 与 TOCA 机制下有效参与强度",
+        x_label="边缘节点数",
+        y_label="参与强度",
+        caption="图 4-2 不同机制下参与强度比较",
         output_path=figure_dir / "figure_4_2.png",
     )
-    figures.append({"label": "图 4-2 DIM、PRM、TRAIM 与 TOCA 有效参与强度", "filename": "figure_4_2.png"})
+    figures.append({"label": "图 4-2 不同机制下参与强度比较", "filename": "figure_4_2.png"})
 
     preference = results["preference_mean_effect"]
     paper_line_chart(
         x_values=results["config"]["node_counts"],
         series=[(f"d={row['preference_mean']:.1f}", row["values"]) for row in preference["dim_rows"]],
-        x_label="雾节点数",
+        x_label="边缘节点数",
         y_label="目标任务参与节点数",
         caption="图 4-3 DIM 机制下偏好系数对目标任务参与节点数的影响",
         output_path=figure_dir / "figure_4_3.png",
@@ -1274,9 +1259,9 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     paper_line_chart(
         x_values=results["config"]["node_counts"],
         series=[(f"d={row['preference_mean']:.1f}", row["values"]) for row in preference["prm_rows"]],
-        x_label="雾节点数",
-        y_label="雾节点参与强度",
-        caption="图 4-4 PRM 机制下偏好系数对雾节点参与强度的影响",
+        x_label="边缘节点数",
+        y_label="边缘节点参与强度",
+        caption="图 4-4 PRM 机制下偏好系数对边缘节点参与强度的影响",
         output_path=figure_dir / "figure_4_4.png",
         figsize=(6.3, 5.2),
     )
@@ -1288,10 +1273,10 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
         series=[(mechanism, [row.get(mechanism) for row in offloaded_curve]) for mechanism in comparison_mechanisms],
         x_label="任务数",
         y_label="卸载成功任务数",
-        caption="图 4-5 DIM、PRM 与 TRAIM 机制下卸载成功任务数比较",
+        caption="图 4-5 不同机制下卸载成功任务数比较",
         output_path=figure_dir / "figure_4_5.png",
     )
-    figures.append({"label": "图 4-5 DIM、PRM 与 TRAIM 卸载成功任务数比较", "filename": "figure_4_5.png"})
+    figures.append({"label": "图 4-5 不同机制下卸载成功任务数比较", "filename": "figure_4_5.png"})
 
     task_statistics = mechanism["task_statistics"]
     paper_mechanism_summary_chart(
@@ -1301,10 +1286,10 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
         total_tasks=task_statistics["total_tasks"],
         bid_samples=task_statistics["winning_bid_samples"],
         price_samples=task_statistics["transaction_price_samples"],
-        caption="图 4-6 DIM、PRM 与 TRAIM 机制下任务完成率、出价与成交报酬分布对比",
+        caption="图 4-6 不同机制下任务完成率、出价与支付成本分布比较",
         output_path=figure_dir / "figure_4_6.png",
     )
-    figures.append({"label": "图 4-6 DIM、PRM 与 TRAIM 机制级统计对比", "filename": "figure_4_6.png"})
+    figures.append({"label": "图 4-6 不同机制下任务完成率、出价与支付成本分布比较", "filename": "figure_4_6.png"})
 
     task_order = mechanism["task_order_by_time_cost"] or list(range(1, len(mechanism["task_bid_rows"]["DIM"]) + 1))
     paper_task_heatmap_pair(
@@ -1320,16 +1305,15 @@ def _build_figures(figure_dir: Path, results: dict) -> list[dict]:
     for utility_task_count, utility_rows in mechanism["utility_rows"].items():
         utility_task_count_int = int(utility_task_count)
         figure_name = f"figure_4_{8 if utility_task_count_int == 25 else 9}.png"
-        utility_scale = results["config"].get("utility_display_scale", 1.0)
         paper_line_chart(
             x_values=[row["node_count"] for row in utility_rows],
             series=[(mechanism, [row.get(mechanism) for row in utility_rows]) for mechanism in comparison_mechanisms],
-            x_label="雾节点数",
-            y_label=f"移动设备总效用 / {utility_scale:g}",
-            caption=f"图 4-{8 if utility_task_count == 25 else 9} 任务数为 {utility_task_count} 时 DIM、PRM 与 TRAIM 机制下用户终端设备总效用比较",
+            x_label="边缘节点数",
+            y_label="移动设备总效用",
+            caption=f"图 4-{8 if utility_task_count_int == 25 else 9} 任务数为 {utility_task_count} 时不同机制下移动设备总效用比较",
             output_path=figure_dir / figure_name,
         )
-        figures.append({"label": f"图 4-{8 if utility_task_count == 25 else 9} 任务数为 {utility_task_count} 的用户总效用", "filename": figure_name})
+        figures.append({"label": f"图 4-{8 if utility_task_count_int == 25 else 9} 任务数为 {utility_task_count} 时不同机制下移动设备总效用比较", "filename": figure_name})
 
     truthfulness_rows = results.get("truthfulness_check", {}).get("rows", [])
     if truthfulness_rows:
@@ -1376,7 +1360,7 @@ def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Pa
     utility_rows_selected = utility_rows[utility_task_count]
     task_statistics = results["mechanism_comparison"]["task_statistics"]
     mechanisms = results["mechanism_comparison"]["task_statistics"]["mechanisms"]
-    participation_row = {"metric": "avg_effective_unique_participants"}
+    participation_row = {"metric": "avg_participation_intensity"}
     price_row = {"metric": "avg_transaction_price_task_level"}
     utility_row = {"metric": f"avg_user_utility_task{utility_task_count}"}
     for mechanism in mechanisms:
@@ -1389,7 +1373,100 @@ def _build_summary(results: dict, figure_paths: list[dict], explanation_path: Pa
         "figure_files": [item["filename"] for item in figure_paths],
         "explanation_file": explanation_path.name,
         "audit_file": audit_path.name,
+        "ordering_audit_file": "csv/ordering_audit.csv",
     }
+
+
+def _build_ordering_audit(results: dict) -> list[dict]:
+    mechanisms = _comparison_mechanisms(results["config"])
+    rows: list[dict] = []
+
+    def add_rows(figure: str, metric: str, source_rows: list[dict], axis_key: str) -> None:
+        for source in source_rows:
+            values = {
+                mechanism: source.get(f"{mechanism}_raw", source.get(mechanism))
+                for mechanism in mechanisms
+            }
+            clean_values = {
+                mechanism: float(value)
+                for mechanism, value in values.items()
+                if value is not None
+            }
+            prm = clean_values.get("PRM")
+            dim = clean_values.get("DIM")
+            baseline_values = {
+                mechanism: value
+                for mechanism, value in clean_values.items()
+                if mechanism not in {"PRM", "DIM"}
+            }
+            prm_ge_dim = prm is not None and dim is not None and prm >= dim - 1e-9
+            dim_ge_all_baselines = (
+                dim is not None
+                and all(dim >= value - 1e-9 for value in baseline_values.values())
+            )
+            rows.append(
+                {
+                    "figure": figure,
+                    "metric": metric,
+                    "axis_key": axis_key,
+                    "axis_value": source.get(axis_key),
+                    "passed_prm_ge_dim": prm_ge_dim,
+                    "passed_dim_ge_all_baselines": dim_ge_all_baselines,
+                    "passed_full_order": prm_ge_dim and dim_ge_all_baselines,
+                    **{f"{mechanism}_raw": clean_values.get(mechanism) for mechanism in mechanisms},
+                }
+            )
+
+    add_rows(
+        "figure_3_7",
+        "time_cost_success_rate",
+        results["selection_evaluation"]["time_cost_success_rates"],
+        "bin_index",
+    )
+    add_rows(
+        "figure_4_2",
+        "participation_intensity",
+        results["mechanism_comparison"]["participant_rows"],
+        "node_count",
+    )
+    add_rows(
+        "figure_4_5",
+        "offloaded_tasks",
+        results["mechanism_comparison"]["offloaded_curve_rows"],
+        "task_count",
+    )
+    for utility_task_count, utility_rows in results["mechanism_comparison"]["utility_rows"].items():
+        figure_name = f"figure_4_{8 if int(utility_task_count) == 25 else 9}"
+        add_rows(
+            figure_name,
+            f"user_utility_task_{utility_task_count}",
+            utility_rows,
+            "node_count",
+        )
+
+    stats_rows = _flatten_task_statistics(results["mechanism_comparison"]["task_statistics"])
+    stats_by_mechanism = {row["mechanism"]: row for row in stats_rows}
+    for metric in ("mean_completion_rate", "mean_completed_tasks", "winning_bid_mean", "transaction_price_mean"):
+        source = {mechanism: stats_by_mechanism.get(mechanism, {}).get(metric) for mechanism in mechanisms}
+        clean = {mechanism: float(value) for mechanism, value in source.items() if value is not None}
+        prm = clean.get("PRM")
+        dim = clean.get("DIM")
+        baselines = {mechanism: value for mechanism, value in clean.items() if mechanism not in {"PRM", "DIM"}}
+        prm_ge_dim = prm is not None and dim is not None and prm >= dim - 1e-9
+        dim_ge_all = dim is not None and all(dim >= value - 1e-9 for value in baselines.values())
+        rows.append(
+            {
+                "figure": "figure_4_6",
+                "metric": metric,
+                "axis_key": "summary",
+                "axis_value": "comparison_node_count",
+                "passed_prm_ge_dim": prm_ge_dim,
+                "passed_dim_ge_all_baselines": dim_ge_all,
+                "passed_full_order": prm_ge_dim and dim_ge_all,
+                **{f"{mechanism}_raw": clean.get(mechanism) for mechanism in mechanisms},
+            }
+        )
+    return rows
 
 
 def _write_experiment_csvs(csv_dir: Path, results: dict) -> None:
@@ -1410,6 +1487,7 @@ def _write_experiment_csvs(csv_dir: Path, results: dict) -> None:
     _write_rows(csv_dir / "validations.csv", [results["validations"]])
     _write_rows(csv_dir / "truthfulness_check.csv", results["truthfulness_check"]["rows"])
     _write_rows(csv_dir / "truthfulness_audit.csv", results["truthfulness_check"].get("scan_audit_rows", results["truthfulness_check"]["rows"]))
+    _write_rows(csv_dir / "ordering_audit.csv", results.get("ordering_audit", []))
     _write_toca_raw_csvs(csv_dir, results)
     _write_pcspe_raw_csvs(csv_dir, results)
 
@@ -1426,6 +1504,7 @@ def _write_raw_experiment_csvs(csv_dir: Path, results: dict) -> None:
     for utility_task_count, rows in results["mechanism_comparison"]["utility_rows"].items():
         _write_rows(csv_dir / f"utility_task_{utility_task_count}_raw.csv", rows)
     _write_rows(csv_dir / "truthfulness_check_raw.csv", results["truthfulness_check"]["rows"])
+    _write_rows(csv_dir / "ordering_audit.csv", results.get("ordering_audit", []))
     _write_toca_raw_csvs(csv_dir, results)
     _write_pcspe_raw_csvs(csv_dir, results)
 
@@ -1456,12 +1535,12 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "raw_results",
             "status": "documented",
-            "note": "Simulation outputs are preserved in *_raw fields. Paper-facing comparison fields apply bounded display ordering so PRM remains above DIM and DIM remains above comparative baselines in Figures 3-7, 4-2, 4-5, and 4-6 completion-rate panels.",
+            "note": f"Formal paper-facing comparison fields are copied from raw simulation values because formal_raw_only={bool(results['config'].get('formal_raw_only', True))}. No bounded display-ordering path is applied to paper figures.",
         },
         {
             "topic": "display_scaling",
             "status": "documented",
-            "note": f"Utility plot fields use display_value = raw_value / {results['config'].get('utility_display_scale', 1.0):g}; raw utility fields are preserved as *_raw.",
+            "note": f"Utility rows still write *_display = *_raw / {results['config'].get('utility_display_scale', 1.0):g} for optional scale inspection, but formal plotted mechanism fields use unshaped raw-equivalent values.",
         },
         {
             "topic": "dim_strategy",
@@ -1486,7 +1565,7 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "participation_metrics",
             "status": "documented",
-            "note": "Figure 4-2 plots effective service-node/provider participation. DIM/PRM/TRAIM use provider participation weighted by successful-task completion rate; TOCA adds accepted service-match pressure to unique selected BS nodes; PC-SPE uses active CRPs weighted by sqrt(threshold success rate). Raw bidder/executor details are retained in CSV fields.",
+            "note": "Figure 4-2 plots raw participation intensity from each mechanism's unified output. The metric counts mechanism-level participation opportunities, so PRM multi-round pushes can exceed one unique participant per node. Unique and reported participant diagnostics remain in CSV as *_unique_participants_raw and *_reported_participants_raw.",
         },
         {
             "topic": "preference_figures",
@@ -1506,7 +1585,7 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "toca_figures",
             "status": "documented",
-            "note": "TOCA is included in participation, task success-rate, offloaded-task, task-level payment, utility, and truthfulness outputs. Figure 4-2 reports effective TOCA service strength from unique selected providers plus accepted service-match pressure, while accepted task count remains a separate raw field.",
+            "note": "TOCA is included in participation, task success-rate, offloaded-task, task-level payment, utility, and truthfulness outputs. Figure 4-2 reports TOCA raw participation intensity from the unified mechanism output, while unique selected service nodes and accepted task count remain separate raw fields.",
         },
         {
             "topic": "pcspe_equilibrium_scope",
@@ -1516,7 +1595,12 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "pcspe_metrics",
             "status": "documented",
-            "note": "For PC-SPE, plotted offloaded_tasks is threshold_success_count using pcspe_success_threshold; equivalent_offloaded_tasks=sum(1-x0) is preserved as a supplemental raw field. Task success-rate bins use binary threshold success credit.",
+            "note": f"For PC-SPE, plotted offloaded_tasks is threshold_success_count using pcspe_success_threshold={results['config'].get('pcspe_success_threshold')}; equivalent_offloaded_tasks=sum(1-x0) is preserved as a supplemental raw field. Task success-rate bins use binary threshold success credit.",
+        },
+        {
+            "topic": "figure_4_6_completion_scope",
+            "status": "documented",
+            "note": "Figure 4-6 completion bars are computed directly from each mechanism's simulated offloaded_tasks samples at comparison_node_count; no ordering or display calibration is applied to completed_count_samples or completion_rate_samples.",
         },
         {
             "topic": "bid_price_scope",
@@ -1536,7 +1620,12 @@ def _build_audit_notes(results: dict) -> list[dict]:
         {
             "topic": "paired_task_curves",
             "status": "documented",
-            "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors. Display fields are monotone-bounded for readable PRM > DIM > comparative-baseline ordering; raw curve values remain in *_raw columns.",
+            "note": "Figure 4-5 uses common-random-number task prefixes and reports standard errors. Formal display fields are not monotone-bounded; see csv/ordering_audit.csv for whether raw values satisfy PRM >= DIM >= baselines at each task-count point.",
+        },
+        {
+            "topic": "ordering_audit",
+            "status": "documented",
+            "note": f"Ordering audit rows={len(results.get('ordering_audit', []))}; passed_full_order={sum(1 for row in results.get('ordering_audit', []) if row.get('passed_full_order'))}. Failures are retained rather than hidden.",
         },
         {
             "topic": "representative_heatmap",
@@ -1560,7 +1649,7 @@ def _write_audit_notes(output_dir: Path, results: dict) -> Path:
     lines = [
         "# Experiment Audit Notes",
         "",
-        "This run preserves raw simulation statistics in `*_raw` fields. Paper-facing display fields use documented bounded comparison transforms for stable PRM > DIM > comparative-baseline ordering.",
+        "This run preserves raw simulation statistics in `*_raw` fields. Formal paper-facing fields use raw-equivalent values; bounded display shaping has been removed from the formal plotting path.",
         "",
         "## Notes",
     ]
@@ -1704,7 +1793,7 @@ PRM 在 DIM 的基础上进一步引入偏好逆转，通过动态更新雾节�
 
 ### 3.4 我在实验里怎么落地 PRM
 
-1. 图 4-2 比较 DIM 与 PRM 的总参与节点数。
+1. 图 4-2 比较 DIM 与 PRM 的 raw 参与强度，唯一/报告参与节点数保留在 CSV 审计字段中。
 2. 图 4-3 / 图 4-4 分别测试不同偏好系数均值 `d` 对 DIM 与 PRM 的影响。
 3. 图 4-5 对比不同任务规模下两机制的成功卸载任务数。
 4. 图 4-6 / 图 4-7 输出任务级别的节点出价与成交报酬柱状图。
@@ -1846,160 +1935,8 @@ def _time_cost_success_rate_rows(
             raw_value = sum(in_bin) / len(in_bin) if in_bin else None
             row[f"{mechanism}_raw"] = raw_value
             row[mechanism] = raw_value
-        raw_values = {
-            mechanism: value
-            for mechanism in success_records
-            if (value := row.get(f"{mechanism}_raw")) is not None
-        }
-        display_values = _ordered_comparison_values(
-            raw_values,
-            upper_bound=1.0,
-            margin=0.035,
-            cap_prm=0.985,
-        )
-        for mechanism, value in display_values.items():
-            row[mechanism] = value
-        _shape_time_cost_success_row(row, index)
         rows.append(row)
     return rows
-
-
-def _shape_time_cost_success_row(row: dict, bin_index: int) -> None:
-    dim_floor = [0.56, 0.74, 0.80, 0.76, 0.72]
-    baseline_floors = {
-        "TRAIM": [0.52, 0.62, 0.64, 0.58, 0.56],
-        "TOCA": [0.52, 0.68, 0.56, 0.44, 0.38],
-        "PC-SPE": [0.50, 0.56, 0.48, 0.38, 0.36],
-    }
-    index = min(bin_index, len(dim_floor) - 1)
-    margin = 0.03
-    dim_value = max(float(row.get("DIM") or 0.0), dim_floor[index])
-    prm_value = max(float(row.get("PRM") or 0.0), dim_value + margin)
-    prm_value = min(0.985, prm_value)
-    dim_value = min(dim_value, prm_value - margin)
-    row["PRM"] = prm_value
-    row["DIM"] = dim_value
-    other_ceiling = max(0.0, dim_value - margin)
-    for mechanism, floors in baseline_floors.items():
-        if mechanism not in row or row[mechanism] is None:
-            continue
-        row[mechanism] = min(other_ceiling, max(float(row[mechanism]), floors[index]))
-
-
-def _ordered_comparison_values(
-    raw_values: dict[str, float],
-    upper_bound: float,
-    margin: float,
-    cap_prm: float | None,
-) -> dict[str, float]:
-    if not raw_values:
-        return {}
-    display = dict(raw_values)
-    lower_bound = 0.0
-    upper = max(lower_bound, upper_bound)
-    if "DIM" not in display or "PRM" not in display:
-        return {key: min(upper, max(lower_bound, value)) for key, value in display.items()}
-
-    dim_raw = min(upper, max(lower_bound, display["DIM"]))
-    prm_raw = min(upper, max(lower_bound, display["PRM"]))
-    if cap_prm is not None:
-        prm_ceiling = min(upper, max(lower_bound, cap_prm))
-        prm_value = min(prm_ceiling, prm_raw)
-        prm_value = max(prm_value, min(upper, dim_raw + margin))
-    else:
-        prm_value = prm_raw
-    prm_value = min(upper, max(lower_bound, prm_value))
-
-    dim_ceiling = max(lower_bound, prm_value - margin)
-    dim_value = min(dim_raw, dim_ceiling)
-    if dim_value <= lower_bound and dim_raw > lower_bound:
-        dim_value = min(dim_raw, max(lower_bound, prm_value * 0.85))
-
-    display["PRM"] = prm_value
-    display["DIM"] = dim_value
-    other_ceiling = max(lower_bound, dim_value - margin)
-    for mechanism, raw_value in raw_values.items():
-        if mechanism in {"PRM", "DIM"}:
-            continue
-        display[mechanism] = min(max(lower_bound, raw_value), other_ceiling)
-    return display
-
-
-def _enforce_ordered_monotone_rows(
-    rows: list[dict],
-    mechanisms: list[str],
-    upper_reference: str,
-    margin_ratio: float,
-) -> None:
-    previous: dict[str, float] = {}
-    for row in rows:
-        scale = float(row.get("node_count", row.get("task_count", 1.0)))
-        margin = max(0.1, scale * margin_ratio)
-        upper_value = float(row.get(upper_reference, scale)) - margin
-        for mechanism in mechanisms:
-            if mechanism in {"PRM", upper_reference}:
-                continue
-            current = float(row.get(mechanism, 0.0))
-            if mechanism in previous:
-                current = max(current, previous[mechanism])
-            current = min(current, max(0.0, upper_value))
-            row[mechanism] = current
-            previous[mechanism] = current
-
-
-def _shape_participant_display_rows(rows: list[dict], mechanisms: list[str]) -> None:
-    previous_toca = 0.0
-    previous_pcspe = 0.0
-    for row in rows:
-        node_count = float(row.get("node_count", 1.0))
-        dim_value = float(row.get("DIM", 0.0))
-        margin = max(0.25, node_count * 0.012)
-        dim_ceiling = max(0.0, dim_value - margin)
-        if "TOCA" in mechanisms:
-            toca_target = min(dim_ceiling, node_count * 0.48)
-            toca_target = max(previous_toca, toca_target)
-            row["TOCA"] = min(toca_target, dim_ceiling)
-            previous_toca = row["TOCA"]
-        if "PC-SPE" in mechanisms:
-            pcspe_target = min(dim_ceiling, node_count * 0.30)
-            pcspe_target = max(previous_pcspe, pcspe_target)
-            row["PC-SPE"] = min(pcspe_target, dim_ceiling)
-            previous_pcspe = row["PC-SPE"]
-        for mechanism in mechanisms:
-            if mechanism in {"PRM", "DIM", "TOCA", "PC-SPE"}:
-                continue
-            row[mechanism] = min(float(row.get(mechanism, 0.0)), dim_ceiling)
-
-
-def _shape_utility_display_rows(rows: list[dict], mechanisms: list[str]) -> None:
-    if not rows:
-        return
-    previous: dict[str, float] = {}
-    count = max(1, len(rows) - 1)
-    for index, row in enumerate(rows):
-        dim_value = max(0.0, float(row.get("DIM", 0.0)))
-        dim_value *= 1.06
-        if "PRM" in row:
-            row["PRM"] = max(float(row["PRM"]), dim_value + max(8.0, dim_value * 0.10))
-        if "PRM" in row:
-            dim_value = min(dim_value, float(row["PRM"]) - max(6.0, dim_value * 0.04))
-        row["DIM"] = max(0.0, dim_value)
-        dim_ceiling = max(0.0, dim_value - max(3.0, dim_value * 0.035))
-        progress = index / count
-        targets = {
-            "TRAIM": min(float(row.get("TRAIM", 0.0)) * 1.08, dim_value * (0.86 + 0.09 * progress)),
-            "TOCA": min(float(row.get("TOCA", 0.0)) * 1.12, dim_value * (0.62 + 0.05 * progress)),
-            "PC-SPE": dim_value * (0.52 + 0.08 * progress),
-        }
-        for mechanism, target in targets.items():
-            if mechanism not in mechanisms:
-                continue
-            value = max(0.0, min(target, dim_ceiling))
-            if mechanism in previous:
-                value = max(value, previous[mechanism])
-                value = min(value, dim_ceiling)
-            row[mechanism] = value
-            previous[mechanism] = value
 
 
 def _quantile_edges(values: list[float], bin_count: int) -> list[float]:
@@ -2027,14 +1964,8 @@ def _append_task_statistics(task_statistics: dict, comparison: dict, repeat_inde
         mechanism: float(comparison[mechanism]["offloaded_tasks"])
         for mechanism in task_statistics["mechanisms"]
     }
-    display_completed_counts = _ordered_comparison_values(
-        raw_completed_counts,
-        upper_bound=float(comparison["task_count"]),
-        margin=max(0.5, float(comparison["task_count"]) * 0.02),
-        cap_prm=None,
-    )
     for mechanism in task_statistics["mechanisms"]:
-        completed_count = display_completed_counts[mechanism]
+        completed_count = raw_completed_counts[mechanism]
         task_statistics["completed_count_samples"][mechanism].append(completed_count)
         task_statistics["completion_rate_samples"][mechanism].append(completed_count / comparison["task_count"])
         task_statistics["winning_bid_samples"][mechanism].extend(_present_values(bid_rows[mechanism]))

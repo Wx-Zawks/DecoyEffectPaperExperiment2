@@ -7,33 +7,33 @@
     },
     "computational_efficiency": {
       "claimed_complexity": "O(IJlogJ)",
-      "validation_runtime_ms": 6.7329
+      "validation_runtime_ms": 3.6602
     },
     "minimum_node_utility": 0.0
   },
   "mechanism_rows": [
     {
-      "metric": "avg_effective_unique_participants",
+      "metric": "avg_participation_intensity",
       "DIM": 27.016166666666667,
-      "PRM": 30.516666666666666,
-      "TRAIM": 20.506,
-      "TOCA": 16.532166666666665,
-      "PC-SPE": 10.5
+      "PRM": 85.89999999999999,
+      "TRAIM": 23.02033333333333,
+      "TOCA": 22.6944125,
+      "PC-SPE": 10.91206658594942
     },
     {
       "metric": "avg_transaction_price_task_level",
       "DIM": 392.9076858661171,
       "PRM": 189.54761939004084,
-      "TRAIM": 246.67405477681626,
-      "TOCA": 195.09209650702027,
+      "TRAIM": 249.62606514443235,
+      "TOCA": 198.0155626505295,
       "PC-SPE": 280.2213554484878
     },
     {
       "metric": "avg_user_utility_task50",
       "DIM": 20895.7612496029,
       "PRM": 30693.663017079463,
-      "TRAIM": 19814.4384100273,
-      "TOCA": 14313.295747755734,
+      "TRAIM": 21075.886788548945,
+      "TOCA": 14984.57662663195,
       "PC-SPE": 14763.749171624788
     }
   ],
@@ -54,5 +54,6 @@
   ],
   "explanation_file": "DIM_PRM_算法实现说明.md",
   "audit_file": "audit_notes.md",
+  "ordering_audit_file": "csv/ordering_audit.csv",
   "runtime_file": "runtime_report.md"
 }
